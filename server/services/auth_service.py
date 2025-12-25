@@ -1,10 +1,10 @@
 from models.user import User
 
 
-def create_user(db, email: str, password_hash: str) -> User:
+def create_user(db, email: str, digest: str) -> User:
     user = User(
         email=email,
-        password_hash=password_hash
+        password_hash=digest
     )
     db.add(user)
     db.commit()
