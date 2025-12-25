@@ -1,10 +1,15 @@
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv(".env")
 
 class Config:
     # API
-    API_ADDRESS = "127.0.0.1"
-    API_PORT = 8000
+    API_ADDRESS = os.getenv("API_ADDRESS")
+    API_PORT = int(os.getenv("API_PORT"))
 
     # TCP Server
 
     # Database
-    DB_URL = "postgresql://redbyte:redbyte@localhost:5432/redbyte"
+    DB_URL = os.getenv("DB_URL")
