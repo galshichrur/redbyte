@@ -17,7 +17,7 @@ def get_db():
         db.close()
 
 @router.post("/register")
-def register(email: str, password: str, db = Depends(get_db)) -> dict:
+def register(email: str, full_name: str, password: str, db = Depends(get_db)) -> dict:
     """
     Register a new user if email doesn't already exist.
     Saves the user into the database with hashed salt and pepper password.
@@ -40,8 +40,13 @@ def register(email: str, password: str, db = Depends(get_db)) -> dict:
     hash_b64 = base64.b64encode(password_hash).decode()
     digest = f"pbkdf2_sha256$100000${salt_b64}${hash_b64}"
 
-    user = create_user(db, email, digest)
-    return {"status": "ok", "user_id": user.id}
+    user = create_user(db, email, full_name, digest)
+    token = create_access_token(user.id)
+
+    return {
+        "access_token": token,
+        "token_type": "bearer"
+    }
 
 @router.post("/login")
 def login(email: str, password: str, db = Depends(get_db)) -> dict:

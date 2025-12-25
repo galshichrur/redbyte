@@ -7,5 +7,6 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     email = Column(String, unique=True, nullable=False)
+    full_name = Column(String, unique=False, nullable=False)
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())

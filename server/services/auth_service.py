@@ -1,9 +1,10 @@
 from models.user import User
 
 
-def create_user(db, email: str, digest: str) -> User:
+def create_user(db, email: str, full_name: str, digest: str) -> User:
     user = User(
         email=email,
+        full_name=full_name,
         password_hash=digest
     )
     db.add(user)
