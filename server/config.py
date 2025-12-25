@@ -9,6 +9,11 @@ class Config:
     API_ADDRESS = os.getenv("API_ADDRESS")
     API_PORT = int(os.getenv("API_PORT"))
 
+    # Auth
+    JWT_SECRET = os.getenv("JWT_SECRET")
+    JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
+    JWT_EXPIRE_SECONDS = int(os.getenv("JWT_EXPIRE_SECONDS"))
+
     # TCP Server
 
     # Database

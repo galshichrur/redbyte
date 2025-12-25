@@ -5,6 +5,7 @@ import hmac
 from fastapi import APIRouter, Depends, HTTPException
 from database import SessionLocal
 from services.auth_service import create_user, check_user_exists
+from services.token import create_access_token
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -69,7 +70,9 @@ def login(email: str, password: str, db = Depends(get_db)) -> dict:
     if not hmac.compare_digest(stored_hash, computed_hash):
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
+    token = create_access_token(user.id)
+
     return {
-        "status": "ok",
-        "user_id": user.id
+        "access_token": token,
+        "token_type": "bearer"
     }
