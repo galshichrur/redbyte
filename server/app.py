@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from api.health import router as health_router
+from api.auth import router as auth_router
 from database import init_db
 
 app = FastAPI(title="RedByte Server")
@@ -8,7 +8,7 @@ app = FastAPI(title="RedByte Server")
 def on_startup():
     init_db()
 
-app.include_router(health_router)
+app.include_router(auth_router)
 
 @app.get("/")
 def root():
