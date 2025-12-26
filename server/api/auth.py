@@ -3,21 +3,13 @@ import hashlib
 import base64
 import hmac
 from fastapi import APIRouter, Depends, HTTPException
-from database import SessionLocal
-from services.auth_service import create_user, check_user_exists
+from database import get_db
+from services.auth_services import create_user, get_user_by_email, get_user_by_userid
 from services.token import create_access_token
-from models.user import User
 from services.validate_token import get_current_user_id
 
 
 router = APIRouter(prefix="/auth", tags=["auth"])
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 @router.post("/register")
 def register(email: str, full_name: str, password: str, db = Depends(get_db)) -> dict:
@@ -28,7 +20,7 @@ def register(email: str, full_name: str, password: str, db = Depends(get_db)) ->
     if not email or not password:
         raise HTTPException(status_code=400, detail="Missing fields")
 
-    existing = check_user_exists(db, email)
+    existing = get_user_by_email(db, email)
     if existing:
         raise HTTPException(status_code=400, detail="User already exists")
 
@@ -56,8 +48,8 @@ def login(email: str, password: str, db = Depends(get_db)) -> dict:
     """
     Authenticate a user with given email and password.
     """
-    user = check_user_exists(db, email)
-    if not user:
+    user = get_user_by_email(db, email)
+    if user is None:
         raise HTTPException(status_code=401, detail="Invalid credentials")
 
     algo, iterations, salt_b64, hash_b64 = user.password_hash.split("$")
@@ -86,13 +78,10 @@ def login(email: str, password: str, db = Depends(get_db)) -> dict:
     }
 
 @router.get("/me")
-def get_me(
-    user_id: int = Depends(get_current_user_id),
-    db = Depends(get_db)
-):
-    user = db.query(User).filter(User.id == user_id).first()
+def get_me(user_id: int = Depends(get_current_user_id), db = Depends(get_db)):
+    user = get_user_by_userid(db, user_id)
 
-    if not user:
+    if user is None:
         raise HTTPException(status_code=404, detail="User not found")
 
     return {
