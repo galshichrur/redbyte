@@ -6,6 +6,9 @@ from fastapi import APIRouter, Depends, HTTPException
 from database import SessionLocal
 from services.auth_service import create_user, check_user_exists
 from services.token import create_access_token
+from models.user import User
+from services.validate_token import get_current_user_id
+
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -80,4 +83,20 @@ def login(email: str, password: str, db = Depends(get_db)) -> dict:
     return {
         "access_token": token,
         "token_type": "bearer"
+    }
+
+@router.get("/me")
+def get_me(
+    user_id: int = Depends(get_current_user_id),
+    db = Depends(get_db)
+):
+    user = db.query(User).filter(User.id == user_id).first()
+
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "created_at": user.created_at
     }
