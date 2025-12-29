@@ -2,9 +2,23 @@ from fastapi import FastAPI
 from api.auth import router as auth_router
 from database import init_db
 from config import Config
-
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="RedByte Server")
+
+origins = [
+    "http://localhost:8080",
+    "https://redbyte.vercel.app",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 
 @app.on_event("startup")
 def on_startup():
