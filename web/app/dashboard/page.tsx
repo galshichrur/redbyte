@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useAuth } from "@/lib/auth-context"
 import { createEnrollmentCode } from "@/lib/api"
 import { Copy, Check, Download, Key, Monitor, Clock } from "lucide-react"
@@ -8,42 +8,46 @@ import Link from "next/link"
 
 export default function DashboardPage() {
   const { user, token } = useAuth()
-  const [enrollment, setEnrollment] = useState<{ token: string; expires_at: string } | null>(null)
+  const [enrollmentToken, setEnrollmentToken] = useState<string | null>(null)
+  const [expiresAt, setExpiresAt] = useState<string | null>(null)
   const [isGenerating, setIsGenerating] = useState(false)
   const [copied, setCopied] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [timeLeft, setTimeLeft] = useState<string>("")
-
-  const calculateTimeLeft = useCallback(() => {
-    if (!enrollment?.expires_at) return ""
-    const now = new Date().getTime()
-    const expiry = new Date(enrollment.expires_at).getTime()
-    const diff = expiry - now
-
-    if (diff <= 0) {
-      setEnrollment(null)
-      return ""
-    }
-
-    const minutes = Math.floor(diff / 60000)
-    const seconds = Math.floor((diff % 60000) / 1000)
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`
-  }, [enrollment?.expires_at])
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
 
   useEffect(() => {
-    if (!enrollment?.expires_at) return
+    if (!expiresAt) {
+      setTimeLeft("")
+      return
+    }
 
-    const interval = setInterval(() => {
-      const time = calculateTimeLeft()
-      setTimeLeft(time)
-      if (!time) {
-        clearInterval(interval)
+    const calculateTime = () => {
+      const now = Date.now()
+      // Append Z to treat as UTC if not present
+      const utcExpiry = expiresAt.endsWith("Z") ? expiresAt : expiresAt + "Z"
+      const expiry = new Date(utcExpiry).getTime()
+      const diff = expiry - now
+
+      if (diff <= 0) {
+        setEnrollmentToken(null)
+        setExpiresAt(null)
+        setTimeLeft("")
+        return
       }
-    }, 1000)
 
-    setTimeLeft(calculateTimeLeft())
-    return () => clearInterval(interval)
-  }, [enrollment?.expires_at, calculateTimeLeft])
+      const minutes = Math.floor(diff / 60000)
+      const seconds = Math.floor((diff % 60000) / 1000)
+      setTimeLeft(`${minutes}:${seconds.toString().padStart(2, "0")}`)
+    }
+
+    calculateTime()
+    timerRef.current = setInterval(calculateTime, 1000)
+
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current)
+    }
+  }, [expiresAt])
 
   const generateCode = async () => {
     if (!token) return
@@ -52,7 +56,8 @@ export default function DashboardPage() {
 
     try {
       const response = await createEnrollmentCode(token)
-      setEnrollment({ token: response.token, expires_at: response.expires_at || "" })
+      setEnrollmentToken(response.token)
+      setExpiresAt(response.expires_at || null)
     } catch (err) {
       const message = err instanceof Error ? err.message : "Failed to generate code"
       if (message.includes("already registered")) {
@@ -66,8 +71,8 @@ export default function DashboardPage() {
   }
 
   const copyCode = async () => {
-    if (!enrollment?.token) return
-    await navigator.clipboard.writeText(enrollment.token)
+    if (!enrollmentToken) return
+    await navigator.clipboard.writeText(enrollmentToken)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
   }
@@ -131,7 +136,7 @@ export default function DashboardPage() {
           <h2 className="text-lg font-semibold text-foreground mb-2">Enrollment Code</h2>
           <p className="text-sm text-muted-foreground mb-6">Generate a one-time code to link a new computer</p>
 
-          {!enrollment ? (
+          {!enrollmentToken ? (
             <button
               onClick={generateCode}
               disabled={isGenerating}
@@ -153,7 +158,7 @@ export default function DashboardPage() {
             <div className="space-y-4">
               {/* Code display */}
               <div className="bg-muted/50 rounded-xl p-5 text-center relative">
-                <code className="text-3xl font-mono font-bold text-foreground tracking-widest">{enrollment.token}</code>
+                <code className="text-3xl font-mono font-bold text-foreground tracking-widest">{enrollmentToken}</code>
                 {timeLeft && (
                   <div className="absolute top-3 right-3 flex items-center gap-1 text-xs text-muted-foreground bg-background px-2 py-1 rounded-full border border-border">
                     <Clock className="w-3 h-3" />
