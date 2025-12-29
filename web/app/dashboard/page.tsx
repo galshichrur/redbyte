@@ -1,95 +1,150 @@
 "use client"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
+import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
-import { Shield } from "lucide-react"
+import { createEnrollmentCode } from "@/lib/api"
+import { Copy, Check, Download, Key, Monitor, RefreshCw } from "lucide-react"
+import Link from "next/link"
 
 export default function DashboardPage() {
-  const router = useRouter()
-  const { user, isLoading } = useAuth()
+  const { user, token } = useAuth()
+  const [enrollmentCode, setEnrollmentCode] = useState<string | null>(null)
+  const [isGenerating, setIsGenerating] = useState(false)
+  const [copied, setCopied] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
+  const generateCode = async () => {
+    if (!token) return
+    setIsGenerating(true)
+    setError(null)
+
+    try {
+      const response = await createEnrollmentCode(token)
+      setEnrollmentCode(response.code)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to generate code")
+    } finally {
+      setIsGenerating(false)
     }
-  }, [isLoading, user, router])
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    )
   }
 
-  if (!user) {
-    return null
+  const copyCode = async () => {
+    if (!enrollmentCode) return
+    await navigator.clipboard.writeText(enrollmentCode)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
   }
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      <Header />
-      <main className="flex-1 pt-24 pb-12 px-6">
-        <div className="max-w-6xl mx-auto">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-foreground">Welcome back, {user.full_name.split(" ")[0]}</h1>
-            <p className="text-muted-foreground mt-1">Monitor and manage your network security</p>
+    <div className="max-w-4xl mx-auto">
+      {/* Welcome */}
+      <div className="mb-8">
+        <h1 className="text-2xl font-bold text-foreground">Welcome, {user?.full_name?.split(" ")[0] || "User"}</h1>
+        <p className="text-muted-foreground mt-1">Connect your computers to start monitoring</p>
+      </div>
+
+      {/* Connect Agent Section */}
+      <div className="bg-background border border-border rounded-xl p-6 md:p-8">
+        <h2 className="text-lg font-semibold text-foreground mb-6">Connect an Agent</h2>
+
+        {/* Steps */}
+        <div className="grid gap-6 md:grid-cols-3 mb-8">
+          {/* Step 1 */}
+          <div className="flex flex-col items-center text-center p-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Download className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-sm font-medium text-foreground mb-1">1. Download</div>
+            <p className="text-xs text-muted-foreground">Get the agent for Windows</p>
           </div>
 
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                  <Shield className="w-5 h-5 text-primary" />
-                </div>
-                <h3 className="font-semibold">Active Agents</h3>
-              </div>
-              <p className="text-3xl font-bold">0</p>
-              <p className="text-sm text-muted-foreground mt-1">No agents connected yet</p>
+          {/* Step 2 */}
+          <div className="flex flex-col items-center text-center p-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Key className="w-5 h-5 text-primary" />
             </div>
-
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-green-500/10 flex items-center justify-center">
-                  <div className="w-3 h-3 rounded-full bg-green-500" />
-                </div>
-                <h3 className="font-semibold">Network Status</h3>
-              </div>
-              <p className="text-3xl font-bold text-green-500">Secure</p>
-              <p className="text-sm text-muted-foreground mt-1">No threats detected</p>
-            </div>
-
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 rounded-lg bg-orange-500/10 flex items-center justify-center">
-                  <span className="text-orange-500 font-bold">!</span>
-                </div>
-                <h3 className="font-semibold">Alerts</h3>
-              </div>
-              <p className="text-3xl font-bold">0</p>
-              <p className="text-sm text-muted-foreground mt-1">No alerts today</p>
-            </div>
+            <div className="text-sm font-medium text-foreground mb-1">2. Enter Code</div>
+            <p className="text-xs text-muted-foreground">Use your enrollment code</p>
           </div>
 
-          <div className="mt-8 bg-card border border-border rounded-xl p-8 text-center">
-            <Shield className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-            <h2 className="text-xl font-semibold mb-2">Get started with redbyte</h2>
-            <p className="text-muted-foreground mb-6 max-w-md mx-auto">
-              Download and install the redbyte agent on your computers to start monitoring your network.
-            </p>
-            <a
-              href="/download"
-              className="inline-flex items-center justify-center rounded-full bg-primary text-primary-foreground px-6 py-3 font-medium hover:bg-primary/90 transition-colors"
-            >
-              Download Agent
-            </a>
+          {/* Step 3 */}
+          <div className="flex flex-col items-center text-center p-4">
+            <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-3">
+              <Monitor className="w-5 h-5 text-primary" />
+            </div>
+            <div className="text-sm font-medium text-foreground mb-1">3. Done</div>
+            <p className="text-xs text-muted-foreground">Your computer is protected</p>
           </div>
         </div>
-      </main>
-      <Footer />
+
+        {/* Divider */}
+        <div className="border-t border-border my-6" />
+
+        {/* Enrollment Code */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-medium text-foreground">Your Enrollment Code</h3>
+            {enrollmentCode && (
+              <button
+                onClick={generateCode}
+                disabled={isGenerating}
+                className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
+              >
+                <RefreshCw className={`w-3 h-3 ${isGenerating ? "animate-spin" : ""}`} />
+                New code
+              </button>
+            )}
+          </div>
+
+          {!enrollmentCode ? (
+            <button
+              onClick={generateCode}
+              disabled={isGenerating}
+              className="w-full bg-primary text-primary-foreground rounded-lg py-3 font-medium hover:bg-primary/90 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+            >
+              {isGenerating ? (
+                <>
+                  <RefreshCw className="w-4 h-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Key className="w-4 h-4" />
+                  Generate Enrollment Code
+                </>
+              )}
+            </button>
+          ) : (
+            <div className="bg-muted/50 border border-border rounded-lg p-4">
+              <div className="flex items-center justify-between gap-4">
+                <code className="text-2xl font-mono font-bold text-foreground tracking-wider">{enrollmentCode}</code>
+                <button
+                  onClick={copyCode}
+                  className="p-2 hover:bg-muted rounded-lg transition-colors"
+                  title="Copy code"
+                >
+                  {copied ? (
+                    <Check className="w-5 h-5 text-green-500" />
+                  ) : (
+                    <Copy className="w-5 h-5 text-muted-foreground" />
+                  )}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground mt-2">Enter this code in the agent to link your computer</p>
+            </div>
+          )}
+
+          {error && <p className="text-sm text-red-500">{error}</p>}
+        </div>
+
+        {/* Download Link */}
+        <div className="mt-6 pt-6 border-t border-border">
+          <Link href="/download" className="text-sm text-primary hover:underline flex items-center gap-1.5">
+            <Download className="w-4 h-4" />
+            Download the agent for Windows
+          </Link>
+        </div>
+      </div>
     </div>
   )
 }

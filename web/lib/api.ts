@@ -11,6 +11,11 @@ export interface AuthResponse {
   token_type: string
 }
 
+export interface EnrollmentCode {
+  code: string
+  expires_at?: string
+}
+
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {
   const params = new URLSearchParams({ email, password })
   const res = await fetch(`${API_BASE_URL}/auth/login?${params}`, {
@@ -55,6 +60,23 @@ export async function getCurrentUser(token: string): Promise<User> {
 
   if (!res.ok) {
     throw new Error("Failed to get user")
+  }
+
+  return res.json()
+}
+
+export async function createEnrollmentCode(token: string): Promise<EnrollmentCode> {
+  const res = await fetch(`${API_BASE_URL}/enrollment/code`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+  })
+
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({ detail: "Failed to create enrollment code" }))
+    throw new Error(error.detail || "Failed to create enrollment code")
   }
 
   return res.json()
