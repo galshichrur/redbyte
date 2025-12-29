@@ -19,7 +19,9 @@ def create_enrollment_token(db, user_id: int, token_hash: str) -> EnrollmentToke
 
 
 def get_enrollment_token(db, user_id: int):
-    return db.query(EnrollmentToken).filter(EnrollmentToken.user_id == user_id).first()
+    return db.query(EnrollmentToken).filter(
+        (EnrollmentToken.user_id == user_id) and (EnrollmentToken.expires_at > datetime.now(timezone.utc))
+    ).first()
 
 
 def check_enrollment_token_exists(db, token_hash: str):
