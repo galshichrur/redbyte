@@ -1,8 +1,10 @@
 from fastapi import FastAPI
 from api.auth import router as auth_router
+from api.enrollment import enrollment_router
 from database import init_db
 from config import Config
 from fastapi.middleware.cors import CORSMiddleware
+
 
 app = FastAPI(title="RedByte Server")
 
@@ -25,6 +27,7 @@ def on_startup():
     init_db()
 
 app.include_router(auth_router)
+app.include_router(enrollment_router)
 
 @app.get("/")
 def root():
