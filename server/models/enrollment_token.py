@@ -9,4 +9,3 @@ class EnrollmentToken(Base):
 
     token_hash = Column(String, nullable=False)
     expires_at = Column(DateTime)
-    used_at = Column(DateTime)

@@ -30,7 +30,7 @@ def verify_enrollment_token(db, token: str):
     token_hash = hashlib.sha256(token.encode()).hexdigest()
 
     enrollment_token = check_enrollment_token_exists(db, token_hash)
-    if enrollment_token is not None:
+    if (enrollment_token is not None) and (enrollment_token.expires_at > datetime.now(timezone.utc)):
         db.remove(enrollment_token)
         db.commit()
         return True
