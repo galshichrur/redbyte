@@ -8,7 +8,7 @@ def create_enrollment_token(db, user_id: int, token_hash: str) -> EnrollmentToke
     enrollment_token = EnrollmentToken(
         user_id=user_id,
         token_hash=token_hash,
-        expires_at=(datetime.now(timezone.utc) + timedelta(Config.ENROLLMENT_TOKEN_EXPIRE_SECONDS))
+        expires_at=(datetime.now(timezone.utc) + timedelta(seconds=Config.ENROLLMENT_TOKEN_EXPIRE_SECONDS))
     )
     db.add(enrollment_token)
     db.commit()
