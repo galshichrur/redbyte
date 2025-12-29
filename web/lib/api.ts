@@ -12,8 +12,8 @@ export interface AuthResponse {
 }
 
 export interface EnrollmentCode {
-  code: string
-  expires_at?: string
+  token: string
+  expires_at: string
 }
 
 export async function loginUser(email: string, password: string): Promise<AuthResponse> {

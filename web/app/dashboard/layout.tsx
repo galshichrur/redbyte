@@ -6,7 +6,14 @@ import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { useAuth } from "@/lib/auth-context"
 import Link from "next/link"
-import { LogOut, Download } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { LogOut, Home } from "lucide-react"
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const router = useRouter()
@@ -35,9 +42,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     return null
   }
 
-  const getInitials = () => {
-    if (!user?.full_name) return "U"
-    return user.full_name
+  const getInitials = (name?: string) => {
+    if (!name) return "?"
+    return name
       .split(" ")
       .map((n) => n[0])
       .join("")
@@ -45,56 +52,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       .slice(0, 2)
   }
 
+  const getFirstName = (name?: string) => {
+    if (!name) return "User"
+    return name.split(" ")[0]
+  }
+
   return (
     <div className="min-h-screen bg-muted/30">
-      {/* Dashboard Header */}
-      <header className="bg-background border-b border-border sticky top-0 z-50">
-        <div className="flex items-center justify-between h-16 px-6">
-          {/* Logo */}
-          <Link href="/dashboard" className="text-xl font-bold text-primary">
+      <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
+        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
+          <Link href="/dashboard" className="text-xl font-semibold text-primary">
             redbyte
           </Link>
 
-          {/* Nav */}
-          <nav className="hidden md:flex items-center gap-6">
-            <Link
-              href="/dashboard"
-              className="text-sm font-medium text-foreground hover:text-primary transition-colors"
-            >
-              Dashboard
-            </Link>
-            <Link
-              href="/download"
-              className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors flex items-center gap-1.5"
-            >
-              <Download className="w-4 h-4" />
-              Download Agent
-            </Link>
-          </nav>
-
-          {/* User Menu */}
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                <span className="text-sm font-medium text-primary">{getInitials()}</span>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-secondary transition-colors">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
+                  {getInitials(user.full_name)}
+                </div>
+                <span className="text-sm font-medium">{getFirstName(user.full_name)}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-48">
+              <div className="px-2 py-1.5">
+                <p className="text-sm font-medium">{user.full_name || "User"}</p>
+                <p className="text-xs text-muted-foreground">{user.email || ""}</p>
               </div>
-              <span className="hidden sm:block text-sm font-medium text-foreground">
-                {user?.full_name?.split(" ")[0] || "User"}
-              </span>
-            </div>
-            <button
-              onClick={handleLogout}
-              className="text-muted-foreground hover:text-foreground transition-colors p-2"
-              title="Logout"
-            >
-              <LogOut className="w-4 h-4" />
-            </button>
-          </div>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href="/" className="cursor-pointer">
+                  <Home className="w-4 h-4 mr-2" />
+                  Home
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
+                <LogOut className="w-4 h-4 mr-2" />
+                Log out
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="p-6">{children}</main>
+      <main className="max-w-7xl mx-auto p-6">{children}</main>
     </div>
   )
 }
