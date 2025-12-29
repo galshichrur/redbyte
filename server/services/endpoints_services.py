@@ -3,6 +3,7 @@ from datetime import datetime, timezone, timedelta
 from models.enrollment_token import EnrollmentToken
 from config import Config
 
+
 def create_enrollment_token(db, user_id: int, token_hash: str) -> EnrollmentToken:
     enrollment_token = EnrollmentToken(
         user_id=user_id,
