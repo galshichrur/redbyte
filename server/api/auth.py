@@ -87,5 +87,6 @@ def get_me(user_id: int = Depends(get_current_user_id), db = Depends(get_db)):
     return {
         "id": user.id,
         "email": user.email,
+        "full_name": user.full_name,
         "created_at": user.created_at
     }
