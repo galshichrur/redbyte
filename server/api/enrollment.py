@@ -6,7 +6,6 @@ from services.validate_token import get_current_user_id
 from services.auth_services import get_user_by_userid
 from os import urandom
 
-MAX_ENROLLMENT_TOKENS = 10
 
 enrollment_router = APIRouter(prefix="/enrollment", tags=["dashboard"])
 

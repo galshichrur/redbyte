@@ -13,14 +13,21 @@ def update_user_enrollment_code(db, user: User, token: str) -> User:
     return user
 
 
-# def verify_enrollment_token(db, token: str):
-#     token_hash = hashlib.sha256(token.encode()).hexdigest()
-#
-#     enrollment_token = check_enrollment_token_exists(db, token_hash)
-#     if (enrollment_token is not None) and (enrollment_token.expires_at > datetime.now(timezone.utc)):
-#         db.remove(enrollment_token)
-#         db.commit()
-#         return True
-#
-#     return False
+def verify_enrollment_code(db, token: str) -> User | None:
+    token_hash = hashlib.sha256(token.encode()).hexdigest()
+    now = datetime.now(timezone.utc)
 
+    user = db.query(User).filter(
+        User.enrollment_code_hash == token_hash,
+        User.enrollment_code_expires_at > now
+    ).one_or_none()
+
+    if not user:
+        return None
+
+    user.enrollment_code_hash = None
+    user.enrollment_code_expires_at = None
+
+    db.commit()
+    db.refresh(user)
+    return user
