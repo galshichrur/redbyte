@@ -10,3 +10,7 @@ class User(Base):
     full_name = Column(String, unique=False, nullable=False)
     password_hash = Column(String, nullable=False)
     created_at = Column(DateTime, server_default=func.now())
+
+    # Enrollment code
+    enrollment_code_hash = Column(String)
+    enrollment_code_expires_at = Column(DateTime)
