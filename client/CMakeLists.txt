@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.31)
-project(endpoint)
+project(client)
 
 set(CMAKE_CXX_STANDARD 17)
 
-add_executable(endpoint main.cpp)
+add_executable(client main.cpp)
