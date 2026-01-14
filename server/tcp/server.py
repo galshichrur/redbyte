@@ -36,4 +36,9 @@ class Server:
 
         self.socket.close()
         self.is_running = False
+        self.socket = None
+        print("Server stopped.")
 
+    def accept_new_connections(self) -> None:
+
+        while self.is_running:
