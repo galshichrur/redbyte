@@ -1,0 +1,13 @@
+{
+  "name": "redbyte-client",
+  "main": "index.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "electron": "^40.0.0"
+  }
+}
