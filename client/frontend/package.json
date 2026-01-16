@@ -1,13 +1,28 @@
 {
   "name": "redbyte-client",
   "main": "index.js",
+  "version": "0.0.1",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "build": "electron-builder"
   },
   "keywords": [],
   "license": "ISC",
   "type": "commonjs",
   "devDependencies": {
-    "electron": "^40.0.0"
+    "electron": "^40.0.0",
+    "electron-builder": "^26.4.0"
+  },
+  "build": {
+    "appId": "com.redbyte.client",
+    "win": {
+      "target": "nsis"
+    },
+    "extraResources": [
+      {
+        "from": "../backend/out/build/x64-release/client/client.exe",
+        "to": "client.exe"
+      }
+    ]
   }
 }
