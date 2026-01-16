@@ -1,0 +1,118 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, sans-serif;
+  background: #fff;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.screen {
+  display: none;
+  text-align: center;
+  padding: 2rem;
+  max-width: 360px;
+}
+.screen.active {
+  display: block;
+}
+
+.logo {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #dc2626;
+  margin-bottom: 2rem;
+}
+
+.loader {
+  width: 180px;
+  height: 3px;
+  background: #eee;
+  margin: 0 auto;
+  border-radius: 2px;
+  overflow: hidden;
+}
+.loader::after {
+  content: "";
+  display: block;
+  height: 100%;
+  width: 30%;
+  background: #dc2626;
+  animation: slide 1s ease-in-out infinite;
+}
+@keyframes slide {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(400%);
+  }
+}
+
+h1 {
+  font-size: 1.25rem;
+  margin-bottom: 1rem;
+}
+p {
+  color: #666;
+  margin-bottom: 1rem;
+}
+
+input {
+  width: 100%;
+  padding: 0.75rem;
+  font-family: monospace;
+  font-size: 1rem;
+  text-align: center;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  margin-bottom: 0.5rem;
+}
+input:focus {
+  outline: none;
+  border-color: #dc2626;
+}
+
+#error {
+  display: block;
+  font-size: 0.875rem;
+  color: #dc2626;
+  min-height: 1.25rem;
+}
+
+button {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  background: #dc2626;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  margin-top: 0.5rem;
+}
+button:disabled {
+  opacity: 0.5;
+}
+
+.check {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 1rem;
+  background: #dcfce7;
+  color: #16a34a;
+  font-size: 1.5rem;
+  line-height: 56px;
+  border-radius: 50%;
+}
+
+#success button {
+  background: #f5f5f5;
+  color: #111;
+}
