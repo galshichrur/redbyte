@@ -24,5 +24,8 @@
         "to": "client.exe"
       }
     ]
+  },
+  "dependencies": {
+    "dotenv": "^17.2.3"
   }
 }
