@@ -40,5 +40,9 @@
 # debug information files
 *.dwo
 
+# IDE
+.vs
 .idea
 cmake-build-debug
+
+out
