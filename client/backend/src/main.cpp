@@ -14,6 +14,9 @@ bool enroll(const std::string& code) {
 int main() {
     json res;
     res["success"] = check();
-    std::cout << res.dump();
+
+    std::cout << res.dump() << std::endl;
+    std::cout.flush();
+
     return 0;
 }
