@@ -1,7 +1,4 @@
-﻿// client.cpp : Defines the entry point for the application.
-//
-
-#include "client.h"
+﻿#include "main.h"
 #include <iostream>
 #include <string>
 #include "nlohmann/json.hpp"
