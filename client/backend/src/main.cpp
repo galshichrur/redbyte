@@ -3,8 +3,9 @@
 
 using json = nlohmann::json;
 
-bool check() {
-    return true;
+bool is_already_enrolled() {
+    // check if user already enrolled.
+    return false;
 }
 
 bool enroll(const std::string& code) {
@@ -13,7 +14,7 @@ bool enroll(const std::string& code) {
 
 int main() {
     json res;
-    res["success"] = check();
+    res["success"] = is_already_enrolled();
 
     std::cout << res.dump() << std::endl;
     std::cout.flush();
