@@ -1,36 +1,19 @@
-﻿#include "main.h"
-#include <iostream>
-#include <string>
+﻿#include <iostream>
 #include "nlohmann/json.hpp"
 
 using json = nlohmann::json;
 
-int main()
-{
-    std::string line;
+bool check() {
+    return true;
+}
 
-    while (std::getline(std::cin, line)) {
-        json msg = json::parse(line);
-        std::string action = msg["action"];
+bool enroll(const std::string& code) {
+    return true;
+}
 
-        if (action == "check") {
-            // TODO: Check if enrolled token saved locally
-            bool enrolled = true;
-            json response = { {"enrolled", enrolled} };
-            std::cout << response.dump() << std::endl;
-        }
-        else if (action == "enroll") {
-            std::string code = msg["code"];
-            // TODO: Validate enrollment token
-            bool valid = true;
-            if (valid) {
-				// TODO: Save enrollment token locally
-                std::cout << json({ {"success", true} }).dump() << std::endl;
-            }
-            else {
-                std::cout << json({ {"success", false}, {"error", "Invalid code"} }).dump() << std::endl;
-            }
-        }
-    }
+int main() {
+    json res;
+    res["success"] = check();
+    std::cout << res.dump();
     return 0;
 }
