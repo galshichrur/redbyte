@@ -1,7 +1,6 @@
-const { contextBridge, ipcRenderer } = require("electron")
+const { contextBridge, ipcRenderer } = require("electron");
 
 contextBridge.exposeInMainWorld("api", {
   check: () => ipcRenderer.invoke("check"),
-  enroll: (code) => ipcRenderer.invoke("enroll", code),
-  close: () => ipcRenderer.invoke("close"),
-})
+  enroll: (code) => ipcRenderer.invoke("enroll", code)
+});
