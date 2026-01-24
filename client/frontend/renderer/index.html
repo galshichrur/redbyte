@@ -2,33 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>redbyte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self'">
+  <title>RedByte</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <!-- Loading Screen -->
   <div id="loading" class="screen active">
-    <div class="logo">redbyte</div>
-    <div class="loader"></div>
+    <div class="container">
+      <img src="../assets/redbyte-logo.png" alt="RedByte" class="logo">
+      <div class="spinner"></div>
+      <p class="loading-text">Checking connection...</p>
+    </div>
   </div>
 
+  <!-- Register/Enroll Screen -->
   <div id="register" class="screen">
-    <div class="logo">redbyte</div>
-    <h1>Connect Device</h1>
-    <form id="form">
-      <input type="text" id="code" placeholder="XXXX-XXXX-XXXX-XXXX">
-      <span id="error"></span>
-      <button type="submit">Connect</button>
-    </form>
+    <div class="container">
+      <img src="../assets/redbyte-logo.png" alt="RedByte" class="logo">
+      
+      <div class="content">
+        <h1>Connect Your Computer</h1>
+        <p class="subtitle">Enter your enrollment code from the dashboard to link this computer to your account.</p>
+        
+        <form id="form">
+          <div class="input-group">
+            <label for="code">Enrollment Code</label>
+            <input 
+              type="text" 
+              id="code" 
+              placeholder="Enter your code" 
+              autocomplete="off"
+              spellcheck="false"
+              required
+            >
+          </div>
+          
+          <p id="error" class="error"></p>
+          
+          <button type="submit" id="submit-btn">
+            <span class="btn-text">Connect</span>
+            <span class="btn-loading">
+              <span class="btn-spinner"></span>
+            </span>
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 
+  <!-- Success Screen -->
   <div id="success" class="screen">
-    <div class="logo">redbyte</div>
-    <div class="check">✓</div>
-    <h1>Connected</h1>
-    <p>Device protected. You can close this window.</p>
-    <button id="close">Close</button>
+    <div class="container">
+      <img src="../assets/redbyte-logo.png" alt="RedByte" class="logo">
+      
+      <div class="success-content">
+        <div class="success-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/>
+            <polyline points="22 4 12 14.01 9 11.01"/>
+          </svg>
+        </div>
+        <h1>Connected</h1>
+        <p class="subtitle">Your computer is now protected by RedByte. This window will close automatically.</p>
+        <div class="status-badge">
+          <span class="status-dot"></span>
+          <span>Monitoring Active</span>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <script src="./app.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

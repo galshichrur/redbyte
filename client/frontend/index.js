@@ -21,6 +21,9 @@ ipcMain.handle("enroll", async (_, code) => {
 
 app.whenReady().then(() => {
   const win = new BrowserWindow({
+      width: 750,
+      height: 600,
+      icon: path.join(__dirname, './assets/icon.ico'),
     webPreferences: {
       preload: path.join(__dirname, "preload.js")
     }
