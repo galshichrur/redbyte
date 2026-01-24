@@ -4,7 +4,7 @@ const { execFile } = require("child_process");
 
 function callCpp(args = []) {
   return new Promise((resolve, reject) => {
-    execFile("../backend/src/main.exe", args, (err, stdout) => {
+    execFile("../backend/cmake-build-debug/bin/redbyte_client.exe", args, (err, stdout) => {
       if (err) return reject(err);
       resolve(JSON.parse(stdout));
     });
@@ -29,4 +29,5 @@ app.whenReady().then(() => {
     }
   });
   win.loadFile("renderer/index.html");
+  win.removeMenu();
 });
