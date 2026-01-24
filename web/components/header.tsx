@@ -36,9 +36,8 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <img src="/redbyte-icon.png" alt="RedByte" className="w-8 h-8" />
-            <span className="text-xl font-semibold text-primary">RedByte</span>
+          <Link href="/" className="flex items-center">
+            <img src="/redbyte-logo.png" alt="RedByte" className="h-7" />
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">

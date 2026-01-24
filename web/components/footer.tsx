@@ -6,9 +6,8 @@ export function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
-            <Link href="/" className="flex items-center gap-2 mb-4">
-              <img src="/redbyte-icon.png" alt="RedByte" className="w-7 h-7" />
-              <span className="text-lg font-semibold text-primary">redbyte</span>
+            <Link href="/" className="flex items-center mb-4">
+              <img src="/redbyte-logo.png" alt="RedByte" className="h-6" />
             </Link>
             <p className="text-sm text-muted-foreground">
               Network intrusion detection and response. Simple protection for everyone.
