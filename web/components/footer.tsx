@@ -6,8 +6,9 @@ export function Footer() {
       <div className="max-w-6xl mx-auto">
         <div className="grid md:grid-cols-4 gap-8 mb-8">
           <div>
-            <Link href="/" className="font-semibold text-xl text-primary mb-4 block">
-              redbyte
+            <Link href="/" className="flex items-center gap-2 mb-4">
+              <img src="/redbyte-icon.png" alt="RedByte" className="w-7 h-7" />
+              <span className="text-lg font-semibold text-primary">redbyte</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               Network intrusion detection and response. Simple protection for everyone.
@@ -89,7 +90,7 @@ export function Footer() {
         </div>
 
         <div className="pt-8 border-t border-border flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground">© 2025 redbyte. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">© 2025-2026 RedByte. All rights reserved.</p>
           <div className="flex items-center gap-6">
             <a href="#" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Privacy Policy

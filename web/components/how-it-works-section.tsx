@@ -17,8 +17,7 @@ const steps = [
     step: "03",
     icon: Activity,
     title: "Stay protected",
-    description:
-      "Your computer is now monitored 24/7. View status, receive alerts, and manage everything from your dashboard.",
+    description: "Your computer is now monitored 24/7. View status, receive alerts, and manage everything from your dashboard.",
   },
 ]
 

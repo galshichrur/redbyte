@@ -16,26 +16,13 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "redbyte - Network Protection Made Simple",
+  title: "RedByte - Network Protection Made Simple",
   description:
     "Protect your network from cyber attacks with real-time monitoring and instant alerts. No technical expertise required.",
   generator: "v0.app",
   icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
+    icon: "/favicon.ico",
+    apple: "/redbyte-icon.png",
   },
 }
 

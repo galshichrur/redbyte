@@ -36,8 +36,9 @@ export function Header() {
     <header className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="max-w-6xl mx-auto px-6 py-4">
         <div className="flex items-center justify-between">
-          <Link href="/" className="font-semibold text-xl text-primary">
-            redbyte
+          <Link href="/" className="flex items-center gap-2">
+            <img src="/redbyte-icon.png" alt="RedByte" className="w-8 h-8" />
+            <span className="text-xl font-semibold text-primary">RedByte</span>
           </Link>
 
           <nav className="hidden md:flex items-center gap-8">
@@ -46,9 +47,6 @@ export function Header() {
             </a>
             <a href="/#how-it-works" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               How it works
-            </a>
-            <a href="/#dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-              Dashboard
             </a>
             <Link href="/download" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
               Download
@@ -115,9 +113,6 @@ export function Header() {
                 className="text-sm text-muted-foreground hover:text-foreground transition-colors"
               >
                 How it works
-              </a>
-              <a href="/#dashboard" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                Dashboard
               </a>
               <Link href="/download" className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                 Download
