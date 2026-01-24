@@ -61,9 +61,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-muted/30">
       <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <Link href="/dashboard" className="flex items-center gap-2">
-            <img src="/redbyte-icon.png" alt="RedByte" className="w-8 h-8" />
-            <span className="text-xl font-semibold text-primary">redbyte</span>
+          <Link href="/dashboard" className="flex items-center">
+            <img src="/redbyte-logo.png" alt="RedByte" className="h-7" />
           </Link>
 
           <DropdownMenu>
