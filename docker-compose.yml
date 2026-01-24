@@ -1,0 +1,19 @@
+services:
+  server:
+    build: ./server
+    container_name: redbyte-server
+    ports:
+      - "8000:8000" # API
+      - "9000:9000" # TCP
+    restart: unless-stopped
+
+  web:
+    build: ./web
+    container_name: redbyte-web
+    ports:
+      - "3000:3000"
+    environment:
+      - API_BASE_URL=http://server:8000
+    depends_on:
+      - server
+    restart: unless-stopped
