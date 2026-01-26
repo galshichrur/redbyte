@@ -1,7 +1,7 @@
 {
-  "name": "redbyte-client",
+  "name": "redbyte",
   "main": "index.js",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder"
@@ -15,13 +15,15 @@
   },
   "build": {
     "appId": "com.redbyte.client",
+    "productName": "RedByte",
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "icon": "assets/icon.ico"
     },
     "extraResources": [
       {
-        "from": "../backend/out/build/x64-release/client/client.exe",
-        "to": "client.exe"
+        "from": "../backend/cmake-build-debug/bin/redbyte_client.exe",
+        "to": "backend/redbyte_client.exe"
       }
     ]
   },
