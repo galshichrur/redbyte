@@ -1,25 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
+const { spawn } = require("child_process");
 const path = require("path");
-const { execFile } = require("child_process");
 
-function callCpp(args = []) {
-  return new Promise((resolve, reject) => {
-    execFile("../backend/cmake-build-debug/bin/redbyte_client.exe", args, (err, stdout) => {
-      if (err) return reject(err);
-      resolve(JSON.parse(stdout));
-    });
-  });
-}
+let cpp;
 
-ipcMain.handle("check", async () => {
-  return await callCpp(["check"]);
-});
-
-ipcMain.handle("enroll", async (_, code) => {
-  return await callCpp(["enroll", code]);
-});
-
-app.whenReady().then(() => {
+function createWindow() {
   const win = new BrowserWindow({
       width: 750,
       height: 600,
@@ -28,6 +13,26 @@ app.whenReady().then(() => {
       preload: path.join(__dirname, "preload.js")
     }
   });
+
   win.loadFile("renderer/index.html");
   win.removeMenu();
+
+  cpp = spawn(path.join(process.resourcesPath, "backend", "redbyte_client.exe"));
+
+  cpp.stdout.on("data", (data) => {
+    const lines = data.toString().trim().split("\n");
+    for (const line of lines) {
+      const msg = JSON.parse(line);
+      win.webContents.send("backend-msg", msg);
+    }
+  });
+}
+
+ipcMain.on("submit-code", (_, code) => {
+  cpp.stdin.write(JSON.stringify({
+    type: "submit_code",
+    code
+  }) + "\n");
 });
+
+app.whenReady().then(createWindow);
