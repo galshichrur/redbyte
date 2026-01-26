@@ -3,9 +3,10 @@ const { spawn } = require("child_process");
 const path = require("path");
 
 let cpp;
+let win;
 
 function createWindow() {
-  const win = new BrowserWindow({
+   win = new BrowserWindow({
       width: 750,
       height: 600,
       icon: path.join(__dirname, './assets/icon.ico'),
