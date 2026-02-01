@@ -22,8 +22,8 @@
     },
     "extraResources": [
       {
-        "from": "../backend/cmake-build-debug/bin/redbyte_client.exe",
-        "to": "backend/redbyte_client.exe"
+        "from": "../backend/cmake-build-debug/bin/agent.exe",
+        "to": "backend/agent.exe"
       }
     ]
   },

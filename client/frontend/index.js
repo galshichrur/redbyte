@@ -18,7 +18,7 @@ function createWindow() {
   win.loadFile("renderer/index.html");
   win.removeMenu();
 
-  cpp = spawn(path.join(process.resourcesPath, "backend", "redbyte_client.exe"));
+  cpp = spawn(path.join(process.resourcesPath, "backend", "agent.exe"));
 
   cpp.stdout.on("data", (data) => {
     const lines = data.toString().trim().split("\n");
