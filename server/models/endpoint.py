@@ -8,6 +8,9 @@ class Endpoint(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
+    secret_hash = Column(String, nullable=False)
+    secret_created_at = Column(DateTime)
+
     status = Column(String, default="offline")
     hostname = Column(String)
     os = Column(String)
