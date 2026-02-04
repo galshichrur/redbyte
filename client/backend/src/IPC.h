@@ -6,4 +6,7 @@ namespace IPC {
 
     // Send enrollment token validation result to stdout
     void SendValidationResult(bool success);
+
+    // Send an error message to stdout
+    void SendUnableToConnectError();
 }

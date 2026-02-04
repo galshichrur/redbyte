@@ -27,4 +27,14 @@ namespace IPC {
         std::cout.flush();
     }
 
+    // Send an error message to stdout
+    void SendUnableToConnectError() {
+        json msg = {
+            {"type", "error"},
+            {"message", "Unable to connect to server."}
+        };
+
+        std::cout << msg.dump() << std::endl;
+        std::cout.flush();
+    }
 }
