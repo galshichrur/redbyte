@@ -60,4 +60,17 @@ class TCPServer:
             client_thread.start()
 
     def _handle_client(self, client_sock: socket.socket, client_addr: tuple[str, int]) -> None:
-        pass
+        print(f"Client connected from {client_addr[0]}:{client_addr[1]}")
+
+        try:
+            while self.is_running:
+                msg_type, payload = recv_message(client_sock)
+        except Exception as e:
+            print(e)
+
+        finally:
+            client_sock.close()
+            print(f"Client disconnected from {client_addr[0]}:{client_addr[1]}")
+
+            with self.lock:
+                self.client_threads.discard(threading.current_thread())
