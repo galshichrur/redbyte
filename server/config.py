@@ -9,6 +9,9 @@ class Config:
     API_ADDRESS = os.getenv("API_ADDRESS")
     API_PORT = int(os.getenv("API_PORT"))
 
+    # CORS
+    ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS").split(",")
+
     # Auth
     JWT_SECRET = os.getenv("JWT_SECRET")
     JWT_ALGORITHM = os.getenv("JWT_ALGORITHM")
