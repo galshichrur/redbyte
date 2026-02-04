@@ -31,6 +31,16 @@ errorText.textContent = "";
 
 // Receive messages from backend
 window.api.onBackendMsg((msg) => {
+    if (msg.type === "error") {
+    setButtonLoading(false);
+    showScreen(registerScreen);
+
+    errorText.textContent =
+      msg.message || "Failed to connect to server.";
+
+    return;
+  }
+  
   if (msg.type === "code_exists") {
     if (msg.exists) {
       showScreen(successScreen);
