@@ -11,7 +11,10 @@ from contextlib import asynccontextmanager
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    server = TCPServer()
+    server.start()
     yield
+    server.stop()
 
 app = FastAPI(
     title="RedByte Server",
@@ -32,3 +35,12 @@ app.include_router(enrollment_router)
 @app.get("/")
 def root():
     return {"status": "redbyte server running"}
+
+@app.get("/server")
+def server_address():
+    return {
+        "tcp": {
+            "ip": Config.TCP_SERVER_HOST,
+            "port": Config.TCP_SERVER_PORT
+        }
+    }

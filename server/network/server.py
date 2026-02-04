@@ -1,6 +1,6 @@
 import socket
 import threading
-from protocol import recv_message, MessageType
+from network.protocol import recv_message, MessageType
 from config import Config
 
 
