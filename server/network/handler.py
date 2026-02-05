@@ -1,7 +1,7 @@
 import os
 from database import get_db
 from models import Agent
-from protocol import MessageType, send_message
+from network.protocol import MessageType, send_message
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
 

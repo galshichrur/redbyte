@@ -1,9 +1,9 @@
 import socket
 import threading
-
 from network.handler import handle_enroll, handle_auth
 from network.protocol import recv_message, MessageType
 from config import Config
+
 
 
 class TCPServer:
