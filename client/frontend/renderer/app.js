@@ -35,8 +35,7 @@ window.api.onBackendMsg((msg) => {
     setButtonLoading(false);
     showScreen(registerScreen);
 
-    errorText.textContent =
-      msg.message || "Failed to connect to server.";
+    errorText.textContent = msg.message || "Failed to connect to server.";
 
     return;
   }
@@ -64,6 +63,8 @@ window.api.onBackendMsg((msg) => {
     }
   }
 });
+
+window.api.sendReady();
 
 // Handle form submit
 form.addEventListener("submit", (e) => {
