@@ -1,3 +1,3 @@
 from .user import User
-from .endpoint import Endpoint
+from .agent import Agent
 from .event import Event
