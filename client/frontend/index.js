@@ -18,7 +18,13 @@ function createWindow() {
   win.loadFile("renderer/index.html");
   win.removeMenu();
 
-  cpp = spawn(path.join(process.resourcesPath, "backend", "agent.exe"));
+  const exePath = path.join(__dirname, "../backend", "cmake-build-debug", "bin", "agent.exe");
+
+  if (app.isPackaged) {
+      exePath = path.join(process.resourcesPath, "backend", "agent.exe");
+  }
+
+  cpp = spawn(exePath);
 
   cpp.stdout.on("data", (data) => {
     const lines = data.toString().trim().split("\n");
