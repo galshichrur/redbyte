@@ -18,29 +18,20 @@ add_executable(agent
         src/IPC.cpp
 )
 
-target_include_directories(agent
-        PRIVATE
-        src
-)
+target_include_directories(agent PRIVATE src)
 
 if (WIN32)
-    set_target_properties(agent PROPERTIES
-            WIN32_EXECUTABLE TRUE
-    )
     target_compile_definitions(agent PRIVATE UNICODE _UNICODE)
+    target_link_libraries(agent PRIVATE ws2_32)
 endif()
 
 if (MINGW)
     target_link_options(agent PRIVATE
+            -static
             -static-libgcc
             -static-libstdc++
     )
 endif()
-
-target_link_libraries(agent
-        PRIVATE
-        ws2_32
-)
 
 set_target_properties(agent PROPERTIES
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin
