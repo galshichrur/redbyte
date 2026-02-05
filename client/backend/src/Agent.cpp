@@ -13,8 +13,10 @@ constexpr uint16_t SERVER_PORT = 9000;
 
 namespace Agent {
     int run() {
-        // Wait for frontend stdin, then connect to the server
         TcpClient client;
+        bool connected = false;
+
+        // Wait for a frontend stdin message
         std::string line;
         while (std::getline(std::cin, line)) {
             json msg;
@@ -25,7 +27,7 @@ namespace Agent {
             }
 
             if (msg["type"] == "init") {
-                bool connected = client.connectToServer(SERVER_IP, SERVER_PORT);
+                connected = client.connectToServer(SERVER_IP, SERVER_PORT);
                 if (!connected) {
                     IPC::SendUnableToConnectError();
                 }
@@ -52,10 +54,13 @@ namespace Agent {
 
                 // Validate the given code
                 bool success = validateToken(client, code);
-                IPC::SendValidationResult(success);
+                if (!connected) {
+                    IPC::SendUnableToConnectError();
+                }
+                else {
+                    IPC::SendValidationResult(success);
+                }
 
-                if (success)
-                    break;
             }
         }
 
