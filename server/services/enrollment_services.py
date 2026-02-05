@@ -3,7 +3,7 @@ import hashlib
 from datetime import datetime, timezone, timedelta
 from models.user import User
 from config import Config
-
+from typing import Optional
 
 def update_user_enrollment_code(db, user: User, token: str) -> User:
     token_hash = hashlib.sha256(token.encode()).hexdigest()
@@ -23,9 +23,10 @@ def verify_enrollment_code(db, token: str):
         User.enrollment_code_expires_at > now
     ).one_or_none()
 
-    if not user:
+    if user is None:
         return None
 
+    # Reset user enrollment code
     user.enrollment_code_hash = None
     user.enrollment_code_expires_at = None
 

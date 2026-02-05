@@ -6,6 +6,7 @@ LENGTH_SIZE = 4
 TYPE_SIZE = 1
 HEADER_SIZE = LENGTH_SIZE + TYPE_SIZE
 MAX_FRAME_LEN = 2 * 1024 * 1024  # 2MB safety cap
+HEADER = struct.Struct("<IB")
 
 class MessageType(IntEnum):
     ENROLL    = 0x01
@@ -28,22 +29,15 @@ def recv_exact(sock: socket.socket, size: int) -> bytes:
     return data
 
 def recv_message(sock: socket.socket) -> tuple[MessageType, bytes]:
-    # Read length
-    raw_len = recv_exact(sock, LENGTH_SIZE)
-    (msg_length, ) = struct.unpack("<I", raw_len)
+    header = recv_exact(sock, HEADER.size)
+    msg_length, msg_type = HEADER.unpack(header)
 
-    # Read message type
-    msg_type = recv_exact(sock, TYPE_SIZE)[0]
+    if msg_length < 1 or msg_length > MAX_FRAME_LEN:
+        raise ValueError("Invalid frame length")
 
-    # Read payload
-    payload_size = msg_length - 1
-    payload = recv_exact(sock, payload_size)
-
+    payload = recv_exact(sock, msg_length - 1)
     return MessageType(msg_type), payload
 
 def send_message(sock: socket.socket, msg_type: MessageType, payload: bytes = b''):
     length = 1 + len(payload)
-    sock.sendall(struct.pack("<I", length))
-    sock.sendall(struct.pack("B", msg_type))
-    if payload:
-        sock.sendall(payload)
+    sock.sendall(struct.pack("<IB", length, msg_type) + payload)

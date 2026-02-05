@@ -66,13 +66,15 @@ class TCPServer:
 
         try:
             while self.is_running:
+                print("waiting for message...")
                 msg_type, payload = recv_message(client_sock)
-
+                print(f"Received message: type:{msg_type}\t payload: {payload}")
                 if msg_type == MessageType.ENROLL:
                     handle_enroll(client_sock, payload)
-
-                if msg_type == MessageType.AUTH:
+                elif msg_type == MessageType.AUTH:
                     handle_auth(client_sock, payload)
+                else:
+                    print("Unknown message type: ", msg_type)
 
         except Exception as e:
             print(e)

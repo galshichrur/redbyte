@@ -9,7 +9,7 @@ class Agent(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
     agent_id = Column(LargeBinary(8), unique=True, nullable=False)
-    secret_hash = Column(String, nullable=False)
+    secret_hash = Column(LargeBinary(32), nullable=False)
     secret_created_at = Column(DateTime)
 
     status = Column(Boolean, default=False, nullable=False)

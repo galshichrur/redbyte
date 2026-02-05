@@ -1,5 +1,6 @@
 #include "Client.h"
-
+#include <vector>
+#include <cstring>
 #include <ws2tcpip.h>
 
 #pragma comment(lib, "ws2_32.lib")
@@ -32,29 +33,42 @@ bool TcpClient::connectToServer(const std::string& ip, uint16_t port) {
     return true;
 }
 
+static bool send_all(SOCKET sock, const uint8_t* data, size_t len) {
+    size_t total = 0;
+    while (total < len) {
+        int sent = send(sock,
+                        reinterpret_cast<const char*>(data + total),
+                        static_cast<int>(len - total),
+                        0);
+        if (sent <= 0) return false;
+        total += sent;
+    }
+    return true;
+}
+
+
 // Send message using format:
 // [length (4)] [type (1)] [payload]
 bool TcpClient::sendMessage(const Message& msg) {
     uint32_t length = static_cast<uint32_t>(1 + msg.payload.size());
 
-    // Send total length
-    if (send(sock, (char*)&length, sizeof(length), 0) != sizeof(length))
-        return false;
+    std::vector<uint8_t> frame;
+    frame.resize(4 + 1 + msg.payload.size());
 
-    // Send message type
-    if (send(sock, (char*)&msg.type, 1, 0) != 1)
-        return false;
+    // length
+    std::memcpy(frame.data(), &length, 4);
 
-    // Send payload
+    // type
+    frame[4] = static_cast<uint8_t>(msg.type);
+
+    // payload
     if (!msg.payload.empty()) {
-        if (send(sock,
-                 (char*)msg.payload.data(),
-                 msg.payload.size(),
-                 0) != msg.payload.size())
-            return false;
+        std::memcpy(frame.data() + 5,
+                    msg.payload.data(),
+                    msg.payload.size());
     }
 
-    return true;
+    return send_all(sock, frame.data(), frame.size());
 }
 
 // Receive message using format:
