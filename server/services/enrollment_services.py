@@ -1,3 +1,4 @@
+import base64
 import hashlib
 from datetime import datetime, timezone, timedelta
 from models.user import User
@@ -13,7 +14,7 @@ def update_user_enrollment_code(db, user: User, token: str) -> User:
     return user
 
 
-def verify_enrollment_code(db, token: str) -> User | None:
+def verify_enrollment_code(db, token: str):
     token_hash = hashlib.sha256(token.encode()).hexdigest()
     now = datetime.now(timezone.utc)
 

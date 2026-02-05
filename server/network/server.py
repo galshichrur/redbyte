@@ -1,5 +1,7 @@
 import socket
 import threading
+
+from network.handler import handle_enroll, handle_auth
 from network.protocol import recv_message, MessageType
 from config import Config
 
@@ -65,6 +67,13 @@ class TCPServer:
         try:
             while self.is_running:
                 msg_type, payload = recv_message(client_sock)
+
+                if msg_type == MessageType.ENROLL:
+                    handle_enroll(client_sock, payload)
+
+                if msg_type == MessageType.AUTH:
+                    handle_auth(client_sock, payload)
+
         except Exception as e:
             print(e)
 

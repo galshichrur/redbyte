@@ -1,7 +1,7 @@
 import base64
 from database import get_db
 from fastapi import APIRouter, Depends, HTTPException
-from services.endpoints_services import update_user_enrollment_code
+from services.enrollment_services import update_user_enrollment_code
 from services.validate_token import get_current_user_id
 from services.auth_services import get_user_by_userid
 from os import urandom
