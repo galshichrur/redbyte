@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Boolean, LargeBinary
 from sqlalchemy.sql import func
 from database import Base
 
@@ -8,6 +8,7 @@ class Agent(Base):
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
 
+    agent_id = Column(LargeBinary(8), unique=True, nullable=False)
     secret_hash = Column(String, nullable=False)
     secret_created_at = Column(DateTime)
 
