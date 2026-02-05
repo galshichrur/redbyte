@@ -30,7 +30,7 @@ def recv_exact(sock: socket.socket, size: int) -> bytes:
 def recv_message(sock: socket.socket) -> tuple[MessageType, bytes]:
     # Read length
     raw_len = recv_exact(sock, LENGTH_SIZE)
-    (msg_length, ) = struct.unpack("!I", raw_len)
+    (msg_length, ) = struct.unpack("<I", raw_len)
 
     # Read message type
     msg_type = recv_exact(sock, TYPE_SIZE)[0]
