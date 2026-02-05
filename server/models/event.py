@@ -7,7 +7,7 @@ class Event(Base):
 
     id = Column(Integer, primary_key=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    endpoint_id = Column(Integer, ForeignKey("endpoints.id"), nullable=False)
+    agent_id = Column(Integer, ForeignKey("agents.id"), nullable=False)
 
     type = Column(String)
     severity = Column(String)
