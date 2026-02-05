@@ -35,32 +35,39 @@ namespace Agent {
             }
         }
 
-        // Check if agent token already exists on the computer
-        bool enrolled = isAlreadyEnrolled();
+        // Check if agent token already exists and validate it
+        bool enrolled = false;
+        uint64_t agentId;
+        ByteArray agentSecret;
+        if (Enrollment::getAgentToken(agentId, agentSecret)) {
+            enrolled = Enrollment::validateAgentAuth(client, agentId, agentSecret);
+        }
+
         IPC::SendIsEnrolled(enrolled);
-
-        // Receive input from the frontend
-        line = "";
-        while (std::getline(std::cin, line)) {
-            json msg;
-            try {
-                msg = json::parse(line);
-            } catch (...) {
-                continue;
-            }
-
-            if (msg["type"] == "submit_code") {
-                std::string code = msg["code"];
-
-                // Validate the given code
-                bool success = validateToken(client, code);
-                if (!connected) {
-                    IPC::SendUnableToConnectError();
-                }
-                else {
-                    IPC::SendValidationResult(success);
+        if (!enrolled) {
+            // Receive input from the frontend
+            line = "";
+            while (std::getline(std::cin, line)) {
+                json msg;
+                try {
+                    msg = json::parse(line);
+                } catch (...) {
+                    continue;
                 }
 
+                if (msg["type"] == "submit_code") {
+                    std::string code = msg["code"];
+
+                    // Validate the given enrollment code
+                    bool success = Enrollment::validateEnrollmentToken(client, code);
+                    if (!connected) {
+                        IPC::SendUnableToConnectError();
+                    }
+                    else {
+                        IPC::SendValidationResult(success);
+                    }
+
+                }
             }
         }
 
