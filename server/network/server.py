@@ -56,7 +56,7 @@ class TCPServer:
             client_sock, client_addr = self.socket.accept()
             client_thread = threading.Thread(target=self._handle_client, args=(client_sock, client_addr), daemon=True)
 
-            while self.lock:
+            with self.lock:
                 self.client_threads.add(client_thread)
 
             client_thread.start()
