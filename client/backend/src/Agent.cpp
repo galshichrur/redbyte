@@ -5,6 +5,8 @@
 #include "IPC.h"
 #include "network/Client.h"
 #include <external/nlohmann/json.hpp>
+#include <thread>
+#include <chrono>
 
 using json = nlohmann::json;
 
@@ -44,34 +46,32 @@ namespace Agent {
         }
 
         IPC::SendIsEnrolled(enrolled);
-        if (!enrolled) {
-            // Receive input from the frontend
-            line = "";
-            while (std::getline(std::cin, line)) {
-                json msg;
-                try {
-                    msg = json::parse(line);
-                } catch (...) {
-                    continue;
-                }
 
-                if (msg["type"] == "submit_code") {
-                    std::string code = msg["code"];
+        // Receive input from the frontend
+        while (true) {
+            if (!std::getline(std::cin, line)) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(200));
+                continue;
+            }
 
-                    // Validate the given enrollment code
-                    bool success = Enrollment::validateEnrollmentToken(client, code);
-                    if (!connected) {
-                        IPC::SendUnableToConnectError();
-                    }
-                    else {
-                        IPC::SendValidationResult(success);
-                    }
+            json msg;
+            try {
+                msg = json::parse(line);
+            } catch (...) {
+                continue;
+            }
 
+            // Only care about submit_code when not enrolled
+            if (!enrolled && msg["type"] == "submit_code") {
+                std::string code = msg["code"];
+
+                bool success = Enrollment::validateEnrollmentToken(client, code);
+                IPC::SendValidationResult(success);
+
+                if (success) {
+                    enrolled = true;
                 }
             }
         }
-
-        client.close();
-        return 0;
     }
 }

@@ -1,9 +1,11 @@
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
 
-let cpp = null;
 let win = null;
+let tray = null;
+let cpp = null;
+let isQuitting = false;
 let rendererReady = false;
 
 function createWindow() {
@@ -19,6 +21,47 @@ function createWindow() {
   win.loadFile("renderer/index.html");
   win.removeMenu();
 
+  win.on("close", (e) => {
+    if (!isQuitting) {
+      e.preventDefault();
+      win.hide();
+    }
+  });
+
+  createTray();
+  spawnBackend();
+
+  if (rendererReady) sendInit();
+}
+
+function createTray() {
+  tray = new Tray(path.join(__dirname, "./assets/icon.ico"));
+
+  tray.setContextMenu(Menu.buildFromTemplate([
+    {
+      label: "Open",
+      click: () => {
+        win.show();
+        win.focus();
+      }
+    },
+    {
+      label: "Quit",
+      click: () => {
+        isQuitting = true;
+        if (cpp && !cpp.killed) cpp.kill();
+        app.quit();
+      }
+    }
+  ]));
+
+  tray.on("double-click", () => {
+    win.show();
+    win.focus();
+  });
+}
+
+function spawnBackend() {
   const exePath = app.isPackaged
     ? path.join(process.resourcesPath, "backend", "agent.exe")
     : path.join(__dirname, "../backend", "cmake-build-debug", "bin", "agent.exe");
@@ -26,45 +69,33 @@ function createWindow() {
   cpp = spawn(exePath);
 
   cpp.stdout.on("data", (data) => {
-    const lines = data.toString().split(/\r?\n/).filter(Boolean);
-    for (const line of lines) {
+    data.toString().split(/\r?\n/).filter(Boolean).forEach(line => {
       try {
-        const msg = JSON.parse(line);
-        win.webContents.send("backend-msg", msg);
-      } catch (e) {
-        console.error("Invalid backend JSON:", line);
-      }
-    }
+        win.webContents.send("backend-msg", JSON.parse(line));
+      } catch {}
+    });
   });
-
-  cpp.on("exit", (code) => {
-    console.error("Backend exited:", code);
-  });
-
-  if (rendererReady) {
-    sendInit();
-  }
 }
 
 function sendInit() {
-  if (!cpp || cpp.killed) return;
-  cpp.stdin.write(JSON.stringify({ type: "init" }) + "\n");
+  if (cpp && !cpp.killed) {
+    cpp.stdin.write(JSON.stringify({ type: "init" }) + "\n");
+  }
 }
 
 ipcMain.once("renderer-ready", () => {
   rendererReady = true;
-  if (cpp) {
-    sendInit();
-  }
+  if (cpp) sendInit();
 });
 
 ipcMain.on("submit-code", (_, code) => {
-  if (!cpp || cpp.killed) return;
-
-  cpp.stdin.write(JSON.stringify({
-    type: "submit_code",
-    code
-  }) + "\n");
+  if (cpp && !cpp.killed) {
+    cpp.stdin.write(JSON.stringify({ type: "submit_code", code }) + "\n");
+  }
 });
 
 app.whenReady().then(createWindow);
+
+app.on("window-all-closed", (e) => {
+  e.preventDefault();
+});
