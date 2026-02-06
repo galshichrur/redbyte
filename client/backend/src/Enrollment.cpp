@@ -2,8 +2,9 @@
 #include <string>
 #include <cstring>
 #include <windows.h>
-#include <vector>
-#include <cstdint>
+#include "external/nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 namespace Enrollment {
     // Get the agent ID, agent secret if it exists on the computer.
@@ -114,93 +115,68 @@ namespace Enrollment {
 
     // Validate the enrollment token by sending an ENROLL message to server.
     bool validateEnrollmentToken(TcpClient& client, const std::string& code) {
-        Message enrollMsg;
-        enrollMsg.type = MessageType::ENROLL;
-        enrollMsg.payload.assign(code.begin(), code.end());
+        // Construct message
+        json req;
+        req["token"] = code;
 
-        if (!client.sendMessage(enrollMsg)) {
+        Message msg;
+        msg.type = MessageType::ENROLL;
+        msg.payload = req.dump();
+
+        // Send a message to server
+        if (!client.sendMessage(msg))
             return false;
-        }
 
-        Message responseMsg;
-        if (!client.receiveMessage(responseMsg)) {
+        // Receive a message from server
+        Message res;
+        if (!client.receiveMessage(res))
             return false;
-        }
 
-        if (responseMsg.type != MessageType::ENROLL) {
+        if (res.type != MessageType::ENROLL)
             return false;
-        }
 
-        // Validate payload size
-        constexpr size_t PAYLOAD_SIZE = 41;
-        if (responseMsg.payload.size() != PAYLOAD_SIZE) {
+        json j = json::parse(res.payload, nullptr, false);
+        if (j.is_discarded())
             return false;
-        }
 
-        const uint8_t *data = responseMsg.payload.data();
-
-        uint8_t status = data[0];
-        if (status != 1) {
+        if (!j.contains("status") || j["status"] != 1)
             return false;
-        }
 
-        // Get agent id and agent secret
-        uint64_t agentId;
-        ByteArray agentSecret;
+        uint64_t agentId = j["agent_id"];
+        std::string secretB64 = j["agent_secret"];
 
-        // agent_id (8 bytes, little-endian)
-        std::memcpy(&agentId, data + 1, sizeof(uint64_t));
+        ByteArray agentSecret = decodeBase64(secretB64);
 
-        // agent_secret (32 bytes)
-        agentSecret.assign(
-            data + 1 + sizeof(uint64_t),
-            data + PAYLOAD_SIZE
-        );
-
-        storeAgentToken(agentId, agentSecret);
-
-        return true;
+        return storeAgentToken(agentId, agentSecret);
     }
 
     // Validates the agent ID, agent secret by sending an AUTH message to server.
-    bool validateAgentAuth(TcpClient& client, uint64_t agentId, ByteArray agentSecret) {
-        if (agentSecret.size() != 32) {
+    bool validateAgentAuth(TcpClient& client, uint64_t agentId, const ByteArray& agentSecret) {
+        if (agentSecret.empty())
             return false;
-        }
 
-        Message authMsg;
-        authMsg.type = MessageType::AUTH;
-        authMsg.payload.resize(8 + 32);
+        json req;
+        req["agent_id"] = agentId;
+        req["agent_secret"] = encodeBase64(agentSecret);
 
-        // Copy agent_id (little-endian)
-        std::memcpy(authMsg.payload.data(), &agentId, 8);
-        // Copy secret hash
-        std::memcpy(authMsg.payload.data() + 8, agentSecret.data(), 32);
+        Message msg;
+        msg.type = MessageType::AUTH;
+        msg.payload = req.dump();
 
-        if (!client.sendMessage(authMsg)) {
+        if (!client.sendMessage(msg))
             return false;
-        }
 
-        Message responseMsg;
-        if (!client.receiveMessage(responseMsg)) {
+        Message res;
+        if (!client.receiveMessage(res))
             return false;
-        }
 
-        if (responseMsg.type != MessageType::AUTH) {
+        if (res.type != MessageType::AUTH)
             return false;
-        }
 
-        // Validate payload size
-        constexpr size_t PAYLOAD_SIZE = 1;
-        if (responseMsg.payload.size() != PAYLOAD_SIZE) {
+        json j = json::parse(res.payload, nullptr, false);
+        if (j.is_discarded())
             return false;
-        }
 
-        uint8_t *data = responseMsg.payload.data();
-        if (*data != 1) {
-            return false;
-        }
-
-        return true;
+        return j.contains("status") && j["status"] == 1;
     }
 }

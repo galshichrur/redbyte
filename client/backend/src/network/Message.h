@@ -1,8 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <vector>
-
-typedef std::vector<uint8_t> ByteArray;
+#include <string>
 
 enum class MessageType : uint8_t {
     ENROLL    = 0x01,
@@ -15,5 +13,5 @@ enum class MessageType : uint8_t {
 
 struct Message {
     MessageType type;
-    ByteArray payload;
+    std::string payload;
 };

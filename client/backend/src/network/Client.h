@@ -13,11 +13,11 @@ public:
 
     // Send message using format:
     // [length (4)] [type (1)] [payload]
-    bool sendMessage(const Message& msg);
+    bool sendMessage(const Message& msg) const;
 
     // Receive message using format:
     // [length (4)] [type (1)] [payload]
-    bool receiveMessage(Message& msg);
+    bool receiveMessage(Message& msg) const;
 
     // Close socket and cleanup
     void close();

@@ -2,6 +2,9 @@
 #include <vector>
 #include <cstring>
 #include <ws2tcpip.h>
+#include "external/nlohmann/json.hpp"
+
+using json = nlohmann::json;
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -49,50 +52,50 @@ static bool send_all(SOCKET sock, const uint8_t* data, size_t len) {
 
 // Send message using format:
 // [length (4)] [type (1)] [payload]
-bool TcpClient::sendMessage(const Message& msg) {
-    uint32_t length = static_cast<uint32_t>(1 + msg.payload.size());
+bool TcpClient::sendMessage(const Message& msg) const {
+    const uint32_t length = static_cast<uint32_t>(1 + msg.payload.size());
 
-    std::vector<uint8_t> frame;
-    frame.resize(4 + 1 + msg.payload.size());
+    // send length
+    if (!send_all(sock, reinterpret_cast<const uint8_t*>(&length),sizeof(length)))
+        return false;
 
-    // length
-    std::memcpy(frame.data(), &length, 4);
+    // send type
+    const uint8_t type = static_cast<uint8_t>(msg.type);
+    if (!send_all(sock, &type, 1))
+        return false;
 
-    // type
-    frame[4] = static_cast<uint8_t>(msg.type);
-
-    // payload
+    // send JSON payload
     if (!msg.payload.empty()) {
-        std::memcpy(frame.data() + 5,
-                    msg.payload.data(),
-                    msg.payload.size());
+        if (!send_all(sock,reinterpret_cast<const uint8_t*>(msg.payload.data()),msg.payload.size()))
+            return false;
     }
 
-    return send_all(sock, frame.data(), frame.size());
+    return true;
 }
 
 // Receive message using format:
 // [length (4)] [type (1)] [payload]
-bool TcpClient::receiveMessage(Message& msg) {
+bool TcpClient::receiveMessage(Message& msg) const {
     uint32_t length = 0;
 
-    // Read total length
-    if (recv(sock, (char*)&length, sizeof(length), MSG_WAITALL) != sizeof(length))
+    // read length
+    if (recv(sock, reinterpret_cast<char*>(&length),sizeof(length),MSG_WAITALL) != sizeof(length))
         return false;
 
-    // Read the message type
-    if (recv(sock, (char*)&msg.type, 1, MSG_WAITALL) != 1)
+    // read type
+    uint8_t type = 0;
+    if (recv(sock,reinterpret_cast<char*>(&type),1,MSG_WAITALL) != 1)
         return false;
 
-    uint32_t payloadSize = length - 1;
-    msg.payload.resize(payloadSize);
+    msg.type = static_cast<MessageType>(type);
 
-    // Read payload
+    const uint32_t payloadSize = length - 1;
+    msg.payload.clear();
+
     if (payloadSize > 0) {
-        if (recv(sock,
-                 (char*)msg.payload.data(),
-                 payloadSize,
-                 MSG_WAITALL) != payloadSize)
+        msg.payload.resize(payloadSize);
+
+        if (recv(sock,msg.payload.data(),payloadSize,MSG_WAITALL) != payloadSize)
             return false;
     }
 
