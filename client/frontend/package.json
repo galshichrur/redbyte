@@ -18,7 +18,11 @@
     "productName": "RedByte",
     "win": {
       "target": "nsis",
-      "icon": "assets/icon.ico"
+      "icon": "assets/icon.ico",
+      "requestedExecutionLevel": "requireAdministrator"
+    },
+    "nsis": {
+      "include": "build/installer.nsh"
     },
     "extraResources": [
       {
