@@ -1,12 +1,11 @@
-import base64
 import hashlib
 from datetime import datetime, timezone, timedelta
 from models.user import User
 from config import Config
-from typing import Optional
 
-def update_user_enrollment_code(db, user: User, token: str) -> User:
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
+
+def update_user_enrollment_code(db, user: User, token_b64: str) -> User:
+    token_hash = hashlib.sha256(token_b64.encode()).hexdigest()
     user.enrollment_code_hash = token_hash
     user.enrollment_code_expires_at = datetime.now(timezone.utc) + timedelta(seconds=Config.ENROLLMENT_TOKEN_EXPIRE_SECONDS)
     db.commit()
@@ -14,8 +13,8 @@ def update_user_enrollment_code(db, user: User, token: str) -> User:
     return user
 
 
-def verify_enrollment_code(db, token: str):
-    token_hash = hashlib.sha256(token.encode()).hexdigest()
+def verify_enrollment_code(db, token_b64: str):
+    token_hash = hashlib.sha256(token_b64.encode()).hexdigest()
     now = datetime.now(timezone.utc)
 
     user = db.query(User).filter(
