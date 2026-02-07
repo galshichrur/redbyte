@@ -54,10 +54,6 @@ window.api.onBackendMsg((msg) => {
     if (msg.success) {
       errorText.textContent = "";
       showScreen(successScreen);
-
-      setTimeout(() => {
-        window.close();
-      }, 3000);
     } else {
       errorText.textContent = "Invalid enrollment code.";
     }

@@ -39,13 +39,6 @@ function createTray() {
 
   tray.setContextMenu(Menu.buildFromTemplate([
     {
-      label: "Open",
-      click: () => {
-        win.show();
-        win.focus();
-      }
-    },
-    {
       label: "Quit",
       click: () => {
         isQuitting = true;
