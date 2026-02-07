@@ -7,7 +7,7 @@
 using json = nlohmann::json;
 
 namespace Enrollment {
-    bool getAgentSecret(uint64_t& agentId, std::string& agentSecretB64) {
+    bool getAgentSecret(std::string& agentIdB64, std::string& agentSecretB64) {
         HKEY hKey;
 
         if (RegOpenKeyExA(
@@ -19,30 +19,44 @@ namespace Enrollment {
         ) != ERROR_SUCCESS)
             return false;
 
-        DWORD size = sizeof(agentId);
+        DWORD idSize = 0;
+        RegQueryValueExA(
+            hKey,
+            "AgentId",
+            nullptr,
+            nullptr,
+            nullptr,
+            &idSize
+        );
+
+        agentIdB64.resize(idSize);
+
         if (RegQueryValueExA(
             hKey,
             "AgentId",
             nullptr,
             nullptr,
-            reinterpret_cast<BYTE*>(&agentId),
-            &size
+            reinterpret_cast<BYTE*>(agentIdB64.data()),
+            &idSize
         ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
         }
 
-        DWORD strSize = 0;
+        if (!agentIdB64.empty() && agentIdB64.back() == '\0')
+            agentIdB64.pop_back();
+
+        DWORD secretSize = 0;
         RegQueryValueExA(
             hKey,
             "AgentSecret",
             nullptr,
             nullptr,
             nullptr,
-            &strSize
+            &secretSize
         );
 
-        agentSecretB64.resize(strSize);
+        agentSecretB64.resize(secretSize);
 
         if (RegQueryValueExA(
             hKey,
@@ -50,20 +64,19 @@ namespace Enrollment {
             nullptr,
             nullptr,
             reinterpret_cast<BYTE*>(agentSecretB64.data()),
-            &strSize
+            &secretSize
         ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
         }
 
-        // remove trailing null
         if (!agentSecretB64.empty() && agentSecretB64.back() == '\0')
             agentSecretB64.pop_back();
 
         RegCloseKey(hKey);
         return true;
     }
-    bool storeAgentSecret(uint64_t agentId, const std::string& agentSecretB64) {
+    bool storeAgentSecret(const std::string& agentIdB64, const std::string& agentSecretB64) {
         HKEY hKey;
 
         if (RegCreateKeyExA(
@@ -83,9 +96,9 @@ namespace Enrollment {
             hKey,
             "AgentId",
             0,
-            REG_QWORD,
-            reinterpret_cast<const BYTE*>(&agentId),
-            sizeof(agentId)
+            REG_SZ,
+            reinterpret_cast<const BYTE*>(agentIdB64.c_str()),
+            static_cast<DWORD>(agentIdB64.size() + 1)
         ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
@@ -132,20 +145,28 @@ namespace Enrollment {
         if (j.is_discarded())
             return false;
 
-        if (!j.contains("status") || j["status"] != true)
+        bool status = j.value("status", false);
+        if (!status)
             return false;
 
-        uint64_t agentId = j["agent_id"];
-        std::string agentSecretB64 = j["agent_secret"];
+        if (!j.contains("agent_id") || !j["agent_id"].is_string())
+            return false;
 
-        return storeAgentSecret(agentId, agentSecretB64);
+        if (!j.contains("agent_secret") || !j["agent_secret"].is_string())
+            return false;
+
+        std::string agentIdB64 = j["agent_id"].get<std::string>();
+        std::string agentSecretB64 = j["agent_secret"].get<std::string>();
+
+        storeAgentSecret(agentIdB64, agentSecretB64);
+        return status;
     }
-    bool validateAgentAuth(TcpClient& client, uint64_t agentId, const std::string& agentSecretB64) {
-        if (agentSecretB64.empty())
+    bool validateAgentAuth(TcpClient& client, const std::string& agentIdB64, const std::string& agentSecretB64) {
+        if (agentIdB64.empty() || agentSecretB64.empty())
             return false;
 
         json req;
-        req["agent_id"] = agentId;
+        req["agent_id"] = agentIdB64;
         req["agent_secret"] = agentSecretB64;
 
         Message msg;
@@ -166,6 +187,6 @@ namespace Enrollment {
         if (j.is_discarded())
             return false;
 
-        return j.contains("status") && j["status"] == true;
+        return j.value("status", false);;
     }
 }

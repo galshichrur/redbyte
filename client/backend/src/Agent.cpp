@@ -39,7 +39,7 @@ namespace Agent {
 
         // Check if agent credentials already exist and validate it if true
         bool enrolled = false;
-        uint64_t agentId;
+        std::string agentId;
         std::string agentSecret;
         if (Enrollment::getAgentSecret(agentId, agentSecret)) {
             enrolled = Enrollment::validateAgentAuth(client, agentId, agentSecret);

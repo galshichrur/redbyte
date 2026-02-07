@@ -15,7 +15,6 @@ def handle_enroll(sock, payload: Dict[str, Any]):
 
     # Send fail error ENROLL message
     if user is None:
-        print("User not found, invalid token: ", token)
         fail_enroll_response = {
             "status": False
         }

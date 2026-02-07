@@ -48,7 +48,7 @@ def recv_message(sock: socket.socket) -> Tuple[MessageType, Dict[str, Any]]:
         payload = json.loads(payload_bytes.decode())
     except json.JSONDecodeError:
         raise ValueError("Invalid JSON payload")
-
+    print(f"Received message:\t {msg_type} | {payload}\n")
     return MessageType(msg_type), payload
 
 def send_message(sock: socket.socket, msg_type: MessageType, payload: Dict[str, Any] | None = None):
@@ -67,4 +67,5 @@ def send_message(sock: socket.socket, msg_type: MessageType, payload: Dict[str, 
         raise ValueError("Payload too large")
 
     frame = HEADER.pack(length, msg_type) + payload_bytes
+    print(f"Sent message:\t {msg_type} | {payload}\n")
     sock.sendall(frame)
