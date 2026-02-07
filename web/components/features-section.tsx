@@ -38,7 +38,6 @@ export function FeaturesSection() {
     <section id="features" className="py-32 px-6 bg-secondary/30">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-20 opacity-0 animate-fade-up">
-          <p className="text-primary font-medium text-sm uppercase tracking-wider mb-3">Features</p>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4 text-balance">Everything you need to stay safe</h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto">
             Powerful protection made simple.

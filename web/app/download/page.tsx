@@ -1,137 +1,90 @@
 import { Header } from "@/components/header"
 import { Footer } from "@/components/footer"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
-import { Monitor, Download, UserPlus, Link2 } from "lucide-react"
+import { Download, ArrowRight } from "lucide-react"
+import Link from "next/link"
 
 export default function DownloadPage() {
   return (
     <div className="min-h-screen bg-background">
       <Header />
 
-      <main className="pt-32 pb-20 px-6">
-        <div className="max-w-4xl mx-auto">
+      <main className="pt-40 pb-32 px-6">
+        <div className="max-w-3xl mx-auto text-center">
           {/* Hero */}
-          <div className="text-center mb-16">
-            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4 text-balance">Download the Agent</h1>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto text-pretty">
-              Install the redbyte agent on your computer to start monitoring your network. Available for Windows.
+          <div className="mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-6 text-balance">
+              Download RedByte
+            </h1>
+            <p className="text-lg text-muted-foreground max-w-xl mx-auto">
+              Install the agent on your Windows computer and start protecting your network in minutes.
             </p>
           </div>
 
-          {/* Download Cards */}
-          <div className="grid md:grid-cols-2 gap-6 mb-16">
-            {/* Windows 64-bit */}
-            <Card className="border-border hover:border-primary/50 transition-colors">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-primary/10 rounded-xl flex items-center justify-center">
-                    <Monitor className="w-7 h-7 text-primary" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg text-foreground">Windows 64-bit</h3>
-                    <p className="text-sm text-muted-foreground">Recommended for most users</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-6">
-                  For Windows 10, 11 and newer 64-bit systems. Best performance and compatibility.
-                </p>
-                <Button className="w-full gap-2">
-                  <Download className="w-4 h-4" />
-                  Download for Windows x64
-                </Button>
-              </CardContent>
-            </Card>
+          {/* Download Card */}
+          <div className="bg-card border border-border rounded-3xl p-10 md:p-14 mb-12">
+            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
+              <Download className="w-8 h-8 text-primary" />
+            </div>
+            
+            <h2 className="text-2xl font-semibold text-foreground mb-3">Windows 64-bit</h2>
+            <p className="text-muted-foreground mb-8">
+              For Windows 10, 11 and newer systems
+            </p>
 
-            {/* Windows 32-bit */}
-            <Card className="border-border hover:border-primary/50 transition-colors">
-              <CardContent className="p-8">
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 bg-muted rounded-xl flex items-center justify-center">
-                    <Monitor className="w-7 h-7 text-muted-foreground" />
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-lg text-foreground">Windows 32-bit</h3>
-                    <p className="text-sm text-muted-foreground">For older systems</p>
-                  </div>
-                </div>
-                <p className="text-sm text-muted-foreground mb-6">
-                  For older Windows systems running 32-bit architecture. Legacy support.
-                </p>
-                <Button variant="outline" className="w-full gap-2 bg-transparent">
-                  <Download className="w-4 h-4" />
-                  Download for Windows x86
-                </Button>
-              </CardContent>
-            </Card>
+            <a 
+              href="https://github.com/galshichrur/redbyte/releases/download/production/RedByte.Setup.0.1.0.exe"
+              download
+            >
+              <Button size="lg" className="text-base px-10 py-6 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
+                <Download className="w-5 h-5 mr-2" />
+                Download RedByte
+              </Button>
+            </a>
           </div>
 
-          {/* How to get started */}
-          <div className="bg-muted/50 rounded-2xl p-8 md:p-12">
-            <h2 className="text-2xl font-semibold text-foreground mb-8 text-center">How to get started</h2>
-            <div className="grid md:grid-cols-3 gap-8">
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <UserPlus className="w-6 h-6 text-primary" />
+          {/* Getting Started Steps */}
+          <div className="bg-secondary/30 rounded-2xl p-8 md:p-10">
+            <h3 className="text-xl font-semibold text-foreground mb-6">Quick setup</h3>
+            
+            <div className="space-y-4 text-left max-w-md mx-auto mb-8">
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  1
                 </div>
-                <div className="text-sm font-medium text-primary mb-2">Step 1</div>
-                <h3 className="font-semibold text-foreground mb-2">Create an account</h3>
-                <p className="text-sm text-muted-foreground">
-                  Register to get access to your dashboard and link your agents.
-                </p>
+                <div>
+                  <p className="text-foreground font-medium mb-1">Create an account</p>
+                  <p className="text-sm text-muted-foreground">Sign up to get your enrollment code</p>
+                </div>
               </div>
 
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Download className="w-6 h-6 text-primary" />
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  2
                 </div>
-                <div className="text-sm font-medium text-primary mb-2">Step 2</div>
-                <h3 className="font-semibold text-foreground mb-2">Download the agent</h3>
-                <p className="text-sm text-muted-foreground">
-                  Choose the right version for your system and install it.
-                </p>
+                <div>
+                  <p className="text-foreground font-medium mb-1">Install the agent</p>
+                  <p className="text-sm text-muted-foreground">Run the installer on your computer</p>
+                </div>
               </div>
 
-              <div className="text-center">
-                <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <Link2 className="w-6 h-6 text-primary" />
+              <div className="flex gap-4">
+                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-semibold flex-shrink-0">
+                  3
                 </div>
-                <div className="text-sm font-medium text-primary mb-2">Step 3</div>
-                <h3 className="font-semibold text-foreground mb-2">Link to your account</h3>
-                <p className="text-sm text-muted-foreground">
-                  Log in through the agent to connect it to your dashboard.
-                </p>
+                <div>
+                  <p className="text-foreground font-medium mb-1">Enter your code</p>
+                  <p className="text-sm text-muted-foreground">Link the agent to your account</p>
+                </div>
               </div>
             </div>
 
-            <div className="mt-10 text-center">
-              <Button size="lg">Create your account</Button>
-            </div>
-          </div>
-
-          {/* System Requirements */}
-          <div className="mt-16">
-            <h2 className="text-xl font-semibold text-foreground mb-6 text-center">System Requirements</h2>
-            <div className="bg-card border border-border rounded-xl p-6">
-              <div className="grid md:grid-cols-2 gap-6 text-sm">
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Operating System</h4>
-                  <p className="text-muted-foreground">Windows 10 or later (64-bit recommended)</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Memory</h4>
-                  <p className="text-muted-foreground">Minimum 2GB RAM</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Disk Space</h4>
-                  <p className="text-muted-foreground">50MB available space</p>
-                </div>
-                <div>
-                  <h4 className="font-medium text-foreground mb-2">Network</h4>
-                  <p className="text-muted-foreground">Internet connection required</p>
-                </div>
-              </div>
-            </div>
+            <Button size="lg" variant="outline" className="bg-transparent" asChild>
+              <Link href="/register">
+                Create your account
+                <ArrowRight className="w-4 h-4 ml-2" />
+              </Link>
+            </Button>
           </div>
         </div>
       </main>

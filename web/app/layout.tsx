@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "RedByte - Network Protection Made Simple",
+  title: "RedByte - Simple protection for everyone.",
   description:
     "Protect your network from cyber attacks with real-time monitoring and instant alerts.",
   icons: {
