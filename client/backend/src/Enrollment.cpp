@@ -132,8 +132,9 @@ namespace Enrollment {
         if (j.is_discarded())
             return false;
 
-        if (!j.contains("status") || j["status"] != 1)
+        if (!j.contains("status") || j["status"] != true)
             return false;
+
         uint64_t agentId = j["agent_id"];
         std::string agentSecretB64 = j["agent_secret"];
 
@@ -165,6 +166,6 @@ namespace Enrollment {
         if (j.is_discarded())
             return false;
 
-        return j.contains("status") && j["status"] == 1;
+        return j.contains("status") && j["status"] == true;
     }
 }
