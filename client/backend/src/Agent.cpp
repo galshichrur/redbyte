@@ -37,11 +37,11 @@ namespace Agent {
             }
         }
 
-        // Check if agent token already exists and validate it
+        // Check if agent credentials already exist and validate it if true
         bool enrolled = false;
         uint64_t agentId;
-        ByteArray agentSecret;
-        if (Enrollment::getAgentToken(agentId, agentSecret)) {
+        std::string agentSecret;
+        if (Enrollment::getAgentSecret(agentId, agentSecret)) {
             enrolled = Enrollment::validateAgentAuth(client, agentId, agentSecret);
         }
 
