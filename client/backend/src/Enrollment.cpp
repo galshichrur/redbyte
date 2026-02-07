@@ -7,8 +7,7 @@
 using json = nlohmann::json;
 
 namespace Enrollment {
-    // Get the agent ID, agent secret if it exists on the computer.
-    bool getAgentToken(uint64_t& agentId, ByteArray& agentSecret) {
+    bool getAgentSecret(uint64_t& agentId, std::string& agentSecretB64) {
         HKEY hKey;
 
         if (RegOpenKeyExA(
@@ -17,9 +16,8 @@ namespace Enrollment {
             0,
             KEY_READ,
             &hKey
-        ) != ERROR_SUCCESS) {
+        ) != ERROR_SUCCESS)
             return false;
-        }
 
         DWORD size = sizeof(agentId);
         if (RegQueryValueExA(
@@ -27,48 +25,48 @@ namespace Enrollment {
             "AgentId",
             nullptr,
             nullptr,
-            (BYTE*)&agentId,
+            reinterpret_cast<BYTE*>(&agentId),
             &size
         ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
         }
 
-        // Get secret size
-        DWORD secretSize = 0;
+        DWORD strSize = 0;
         RegQueryValueExA(
             hKey,
             "AgentSecret",
             nullptr,
             nullptr,
             nullptr,
-            &secretSize
+            &strSize
         );
 
-        agentSecret.resize(secretSize);
+        agentSecretB64.resize(strSize);
 
         if (RegQueryValueExA(
             hKey,
             "AgentSecret",
             nullptr,
             nullptr,
-            agentSecret.data(),
-            &secretSize
+            reinterpret_cast<BYTE*>(agentSecretB64.data()),
+            &strSize
         ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
         }
 
+        // remove trailing null
+        if (!agentSecretB64.empty() && agentSecretB64.back() == '\0')
+            agentSecretB64.pop_back();
+
         RegCloseKey(hKey);
         return true;
     }
-
-    // Stores the given enrollment token on the computer.
-    bool storeAgentToken(uint64_t agentId, ByteArray agentSecret) {
+    bool storeAgentSecret(uint64_t agentId, const std::string& agentSecretB64) {
         HKEY hKey;
 
-        // Create or open the key
-        LONG status = RegCreateKeyExA(
+        if (RegCreateKeyExA(
             HKEY_LOCAL_MACHINE,
             "SOFTWARE\\RedByte\\Agent",
             0,
@@ -78,44 +76,39 @@ namespace Enrollment {
             nullptr,
             &hKey,
             nullptr
-        );
-
-        if (status != ERROR_SUCCESS) {
+        ) != ERROR_SUCCESS)
             return false;
-        }
 
-        // Store AgentId
-        status = RegSetValueExA(
+        if (RegSetValueExA(
             hKey,
             "AgentId",
             0,
             REG_QWORD,
             reinterpret_cast<const BYTE*>(&agentId),
             sizeof(agentId)
-        );
-
-        if (status != ERROR_SUCCESS) {
+        ) != ERROR_SUCCESS) {
             RegCloseKey(hKey);
             return false;
         }
 
-        // Store AgentSecret
-        status = RegSetValueExA(
+        if (RegSetValueExA(
             hKey,
             "AgentSecret",
             0,
-            REG_BINARY,
-            agentSecret.data(),
-            agentSecret.size()
-        );
+            REG_SZ,
+            reinterpret_cast<const BYTE*>(agentSecretB64.c_str()),
+            static_cast<DWORD>(agentSecretB64.size() + 1)
+        ) != ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return false;
+        }
 
         RegCloseKey(hKey);
-        return status == ERROR_SUCCESS;
+        return true;
     }
 
-    // Validate the enrollment token by sending an ENROLL message to server.
     bool validateEnrollmentToken(TcpClient& client, const std::string& code) {
-        // Construct message
+        // Construct the message to send
         json req;
         req["token"] = code;
 
@@ -141,23 +134,18 @@ namespace Enrollment {
 
         if (!j.contains("status") || j["status"] != 1)
             return false;
-
         uint64_t agentId = j["agent_id"];
-        std::string secretB64 = j["agent_secret"];
+        std::string agentSecretB64 = j["agent_secret"];
 
-        ByteArray agentSecret = decodeBase64(secretB64);
-
-        return storeAgentToken(agentId, agentSecret);
+        return storeAgentSecret(agentId, agentSecretB64);
     }
-
-    // Validates the agent ID, agent secret by sending an AUTH message to server.
-    bool validateAgentAuth(TcpClient& client, uint64_t agentId, const ByteArray& agentSecret) {
-        if (agentSecret.empty())
+    bool validateAgentAuth(TcpClient& client, uint64_t agentId, const std::string& agentSecretB64) {
+        if (agentSecretB64.empty())
             return false;
 
         json req;
         req["agent_id"] = agentId;
-        req["agent_secret"] = encodeBase64(agentSecret);
+        req["agent_secret"] = agentSecretB64;
 
         Message msg;
         msg.type = MessageType::AUTH;

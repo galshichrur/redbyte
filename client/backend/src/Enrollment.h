@@ -1,14 +1,10 @@
 #pragma once
 #include <string>
-#include <vector>
 #include "network/Client.h"
 
-
-typedef std::vector<uint8_t> ByteArray;
-
 namespace Enrollment {
-    bool getAgentToken(uint64_t& agentId, ByteArray& agentSecret);
-    bool storeAgentToken(std::string token);
+    bool getAgentSecret(uint64_t& agentId, std::string& agentSecretB64);
+    bool storeAgentSecret(uint64_t agentId, const std::string& agentSecretB64);
     bool validateEnrollmentToken(TcpClient& client, const std::string& code);
-    bool validateAgentAuth(TcpClient& client, uint64_t agentId, ByteArray agentSecret);
+    bool validateAgentAuth(TcpClient& client, uint64_t agentId, const std::string& agentSecretB64);
 }
