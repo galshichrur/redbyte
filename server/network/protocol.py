@@ -1,6 +1,8 @@
 import struct
 import socket
+import json
 from enum import IntEnum
+from typing import Tuple, Dict, Any
 
 LENGTH_SIZE = 4
 TYPE_SIZE = 1
@@ -28,16 +30,41 @@ def recv_exact(sock: socket.socket, size: int) -> bytes:
         data += chunk
     return data
 
-def recv_message(sock: socket.socket) -> tuple[MessageType, bytes]:
+def recv_message(sock: socket.socket) -> Tuple[MessageType, Dict[str, Any]]:
+    """
+    Receive a message and return: (MessageType, payload) as dict
+    """
+    # Receive length header
     header = recv_exact(sock, HEADER.size)
-    msg_length, msg_type = HEADER.unpack(header)
+    length, msg_type = HEADER.unpack(header)
 
-    if msg_length < 1 or msg_length > MAX_FRAME_LEN:
+    if length < 1 or length > MAX_FRAME_LEN:
         raise ValueError("Invalid frame length")
 
-    payload = recv_exact(sock, msg_length - 1)
+    # Receive payload
+    payload_bytes = recv_exact(sock, length - 1)
+    # Parse to json
+    try:
+        payload = json.loads(payload_bytes.decode())
+    except json.JSONDecodeError:
+        raise ValueError("Invalid JSON payload")
+
     return MessageType(msg_type), payload
 
-def send_message(sock: socket.socket, msg_type: MessageType, payload: bytes = b''):
-    length = 1 + len(payload)
-    sock.sendall(struct.pack("<IB", length, msg_type) + payload)
+def send_message(sock: socket.socket, msg_type: MessageType, payload: Dict[str, Any] | None = None):
+    """
+    Send a message with JSON payload.
+    """
+
+    if payload is None:
+        payload = {}
+
+    # Dump to json and encode to bytes
+    payload_bytes = json.dumps(payload, separators=(",", ":")).encode("utf-8")
+    length = 1 + len(payload_bytes)
+
+    if length > MAX_FRAME_LEN:
+        raise ValueError("Payload too large")
+
+    frame = HEADER.pack(length, msg_type) + payload_bytes
+    sock.sendall(frame)
