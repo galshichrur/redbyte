@@ -129,7 +129,6 @@ namespace Enrollment {
         AgentInfo info = collect_agent_info();
         req["hostname"] = info.hostname;
         req["os"] = info.os;
-        req["os_version"] = info.os_version;
         req["local_ip"] = info.local_ip;
         req["mac"] = info.mac;
         req["network_type"] = info.network_type;
@@ -181,7 +180,6 @@ namespace Enrollment {
         AgentInfo info = collect_agent_info();
         req["hostname"] = info.hostname;
         req["os"] = info.os;
-        req["os_version"] = info.os_version;
         req["local_ip"] = info.local_ip;
         req["mac"] = info.mac;
         req["network_type"] = info.network_type;

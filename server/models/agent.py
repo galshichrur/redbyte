@@ -19,7 +19,6 @@ class Agent(Base):
     # Agen machine info
     hostname = Column(String)
     os = Column(String)
-    os_version = Column(String)
     local_ip_address = Column(String)
     public_ip_address = Column(String)  # from TCP connection
     port = Column(Integer)  # from TCP connection

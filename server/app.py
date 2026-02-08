@@ -12,9 +12,9 @@ from contextlib import asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
     server = TCPServer()
-    server.start()
+    server.start_server()
     yield
-    server.stop()
+    server.stop_server()
 
 app = FastAPI(
     title="RedByte Server",

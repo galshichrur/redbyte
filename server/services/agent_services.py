@@ -3,7 +3,7 @@ from datetime import datetime
 from models.agent import Agent
 
 
-def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostname: str, os: str, os_version: str,
+def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostname: str, os: str,
                  local_ip_addr: str, public_ip_addr: str, port: int, mac_addr: str) -> Agent:
     agent_secret_hash = hashlib.sha256(agent_secret).digest()
 
@@ -16,7 +16,6 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
         status=True,
         hostname=hostname,
         os=os,
-        os_version=os_version,
         local_ip_addr=local_ip_addr,
         public_ip_addr=public_ip_addr,
         port=port,
@@ -28,7 +27,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
     return agent
 
 
-def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: str, os_version: str,
+def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: str,
                  local_ip_addr: str, public_ip_addr: str, port: int, mac_addr: str):
     agent_secret_hash = hashlib.sha256(agent_secret).digest()
     agent = db.query(Agent).filter(Agent.agent_id == agent_id).first()
@@ -41,7 +40,6 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     agent.status = True
     agent.hostname = hostname
     agent.os = os
-    agent.os_version = os_version
     agent.local_ip_addr = local_ip_addr
     agent.public_ip_addr = public_ip_addr
     agent.port = port

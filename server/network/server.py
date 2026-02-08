@@ -1,9 +1,7 @@
 import socket
 import threading
-from contextlib import nullcontext
 from network.handler import handle_enroll, handle_auth
 from network.protocol import recv_message, MessageType
-from models.agent import Agent
 from services.agent_services import update_agent_status
 from config import Config
 from database import get_db

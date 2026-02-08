@@ -19,7 +19,6 @@ AgentInfo collect_agent_info() {
 
     // OS + version
     info.os = "Windows";
-    info.os_version = "test";
 
     // Network (IP + MAC)
     IP_ADAPTER_INFO adapters[16];
