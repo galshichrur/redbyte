@@ -16,13 +16,17 @@ add_executable(agent
         src/Agent.cpp
         src/network/Client.cpp
         src/IPC.cpp
+        src/information/SystemInfo.cpp
 )
 
 target_include_directories(agent PRIVATE src)
 
 if (WIN32)
     target_compile_definitions(agent PRIVATE UNICODE _UNICODE)
-    target_link_libraries(agent PRIVATE ws2_32)
+    target_link_libraries(agent
+            PRIVATE
+            iphlpapi
+            ws2_32)
 endif()
 
 if (MINGW)

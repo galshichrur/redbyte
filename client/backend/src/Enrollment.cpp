@@ -3,6 +3,7 @@
 #include <cstring>
 #include <windows.h>
 #include "external/nlohmann/json.hpp"
+#include "information/SystemInfo.h"
 
 using json = nlohmann::json;
 
@@ -125,6 +126,14 @@ namespace Enrollment {
         json req;
         req["token"] = code;
 
+        AgentInfo info = collect_agent_info();
+        req["hostname"] = info.hostname;
+        req["os"] = info.os;
+        req["os_version"] = info.os_version;
+        req["local_ip"] = info.local_ip;
+        req["mac"] = info.mac;
+        req["network_type"] = info.network_type;
+
         Message msg;
         msg.type = MessageType::ENROLL;
         msg.payload = req.dump();
@@ -168,6 +177,14 @@ namespace Enrollment {
         json req;
         req["agent_id"] = agentIdB64;
         req["agent_secret"] = agentSecretB64;
+
+        AgentInfo info = collect_agent_info();
+        req["hostname"] = info.hostname;
+        req["os"] = info.os;
+        req["os_version"] = info.os_version;
+        req["local_ip"] = info.local_ip;
+        req["mac"] = info.mac;
+        req["network_type"] = info.network_type;
 
         Message msg;
         msg.type = MessageType::AUTH;
