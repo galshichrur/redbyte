@@ -1,8 +1,12 @@
 import socket
 import threading
+from contextlib import nullcontext
 from network.handler import handle_enroll, handle_auth
 from network.protocol import recv_message, MessageType
+from models.agent import Agent
+from services.agent_services import update_agent_status
 from config import Config
+from database import get_db
 
 
 
@@ -16,7 +20,7 @@ class TCPServer:
         self.client_threads: set[threading.Thread] = set()
         self.lock = threading.Lock()
 
-    def start(self) -> None:
+    def start_server(self) -> None:
         if self.is_running:
             print("Server is already running.")
             return
@@ -32,7 +36,7 @@ class TCPServer:
         self.accept_thread = threading.Thread(target=self._accept_new_connections, daemon=True)
         self.accept_thread.start()
 
-    def stop(self) -> None:
+    def stop_server(self) -> None:
         if not self.is_running:
             print("Server is not running.")
             return
@@ -64,23 +68,44 @@ class TCPServer:
     def _handle_client(self, client_sock: socket.socket, client_addr: tuple[str, int]) -> None:
         print(f"Client connected from {client_addr[0]}:{client_addr[1]}")
 
+        agent = None
+        established = False
+
         try:
             while self.is_running:
                 msg_type, payload = recv_message(client_sock)
-                print(f"Received message from {client_addr}: type: {msg_type}\t payload: {payload}")
-                if msg_type == MessageType.ENROLL:
-                    handle_enroll(client_sock, payload)
-                elif msg_type == MessageType.AUTH:
-                    handle_auth(client_sock, payload)
-                else:
-                    print("Unknown message type: ", msg_type)
+                print(f"Received message from {client_addr}: type={msg_type}\t payload={payload}")
+
+                # Handshake phase
+                if not established:
+                    if msg_type == MessageType.ENROLL:
+                        agent = handle_enroll(client_sock, client_addr, payload)
+
+                    elif msg_type == MessageType.AUTH:
+                        agent = handle_auth(client_sock, client_addr, payload)
+
+                    else:
+                        print("Invalid connection establish message type: ", msg_type)
+                        break
+
+                    if agent is None:
+                        print("Received invalid message.")
+                        break
+
+                    established = True
+                    print(f"Connection established with agent {agent.id}.")
+                    continue
 
         except Exception as e:
             print(e)
 
         finally:
+            # Close client connection
             client_sock.close()
             print(f"Client disconnected from {client_addr[0]}:{client_addr[1]}")
 
             with self.lock:
                 self.client_threads.discard(threading.current_thread())
+
+            if agent is not None:
+                update_agent_status(next(get_db()), agent.id, False)
