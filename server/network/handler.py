@@ -6,7 +6,8 @@ from network.protocol import MessageType, send_message
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
 
-def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
+def \
+        handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     token: str = payload.get("token")
     if token is None:
         return None
@@ -32,7 +33,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         agent_secret=agent_secret,
         hostname=payload.get("hostname"),
         os=payload.get("os"),
-        local_ip_addr=payload.get("ip"),
+        local_ip_addr=payload.get("local_ip"),
         public_ip_addr=sock_addr[0],
         port=sock_addr[1],
         mac_addr=payload.get("mac")
@@ -68,7 +69,7 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         agent_secret = agent_secret,
         hostname = payload.get("hostname"),
         os = payload.get("os"),
-        local_ip_addr = payload.get("ip"),
+        local_ip_addr = payload.get("local_ip"),
         public_ip_addr = sock_addr[0],
         port = sock_addr[1],
         mac_addr = payload.get("mac")

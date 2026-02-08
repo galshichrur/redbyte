@@ -88,7 +88,7 @@ class TCPServer:
 
                     if agent is None:
                         print("Received invalid message.")
-                        break
+                        continue
 
                     established = True
                     print(f"Connection established with agent {agent.id}.")

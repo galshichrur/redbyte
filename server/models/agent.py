@@ -19,10 +19,10 @@ class Agent(Base):
     # Agen machine info
     hostname = Column(String)
     os = Column(String)
-    local_ip_address = Column(String)
-    public_ip_address = Column(String)  # from TCP connection
+    local_ip_addr = Column(String)
+    public_ip_addr = Column(String)  # from TCP connection
     port = Column(Integer)  # from TCP connection
-    mac_address = Column(String)
+    mac_addr = Column(String)
 
     # Connectivity
     first_seen = Column(DateTime, server_default=func.now())

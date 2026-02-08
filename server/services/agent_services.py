@@ -19,7 +19,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
         local_ip_addr=local_ip_addr,
         public_ip_addr=public_ip_addr,
         port=port,
-        mac_address=mac_addr,
+        mac_addr=mac_addr,
     )
     db.add(agent)
     db.commit()
@@ -43,7 +43,7 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     agent.local_ip_addr = local_ip_addr
     agent.public_ip_addr = public_ip_addr
     agent.port = port
-    agent.mac_address = mac_addr
+    agent.mac_addr = mac_addr
     db.commit()
     db.refresh(agent)
 
