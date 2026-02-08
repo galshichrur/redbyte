@@ -6,7 +6,7 @@ from network.protocol import MessageType, send_message
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
 
-def handle_enroll(sock, payload: Dict[str, Any]):
+def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     token: str = payload.get("token")
     if token is None:
         return None
@@ -25,7 +25,19 @@ def handle_enroll(sock, payload: Dict[str, Any]):
     agent_id: bytes = os.urandom(8)
     agent_secret: bytes = os.urandom(32)
 
-    agent = create_agent(next(get_db()), user.id, agent_id, agent_secret)
+    agent = create_agent(
+        db=next(get_db()),
+        user_id=user.id,
+        agent_id=agent_id,
+        agent_secret=agent_secret,
+        hostname=payload.get("hostname"),
+        os=payload.get("os"),
+        os_version=payload.get("os_version"),
+        local_ip_addr=payload.get("ip"),
+        public_ip_addr=sock_addr[0],
+        port=sock_addr[1],
+        mac_addr=payload.get("mac")
+    )
 
     # Encode to base64 format for sending in JSON
     agent_id_b64: str = base64.b64encode(agent_id).decode()
@@ -41,7 +53,7 @@ def handle_enroll(sock, payload: Dict[str, Any]):
     print("User successfully enrolled.")
     return agent
 
-def handle_auth(sock, payload: Dict[str, Any]):
+def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     agent_id_b64 = payload.get("agent_id")
     agent_secret_b64 = payload.get("agent_secret")
 
@@ -51,7 +63,18 @@ def handle_auth(sock, payload: Dict[str, Any]):
     agent_id = base64.b64decode(agent_id_b64)
     agent_secret = base64.b64decode(agent_secret_b64)
 
-    agent = validate_agent(next(get_db()), agent_id, agent_secret)
+    agent = validate_agent(
+        db = next(get_db()),
+        agent_id = agent_id,
+        agent_secret = agent_secret,
+        hostname = payload.get("hostname"),
+        os = payload.get("os"),
+        os_version = payload.get("os_version"),
+        local_ip_addr = payload.get("ip"),
+        public_ip_addr = sock_addr[0],
+        port = sock_addr[1],
+        mac_addr = payload.get("mac")
+    )
 
     if agent is None:
         fail_auth_response = {
