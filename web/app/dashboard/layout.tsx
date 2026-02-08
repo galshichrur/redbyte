@@ -1,102 +1,38 @@
-"use client"
-
 import type React from "react"
+import type { Metadata } from "next"
+import { Inter } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
+import { AuthProvider } from "@/lib/auth-context"
+import "./globals.css"
 
-import { useEffect } from "react"
-import { useRouter } from "next/navigation"
-import { useAuth } from "@/lib/auth-context"
-import Link from "next/link"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { LogOut, Home } from "lucide-react"
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+  display: "swap",
+})
 
-export default function DashboardLayout({ children }: { children: React.ReactNode }) {
-  const router = useRouter()
-  const { user, isLoading, logout } = useAuth()
+export const metadata: Metadata = {
+  title: "RedByte - Network Protection Made Simple",
+  description:
+    "Enterprise-grade network security for everyone. Real-time threat detection and instant response.",
+  generator: "v0.app",
+  icons: {
+    icon: "/favicon.ico",
+    apple: "/redbyte-icon.png",
+  },
+}
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      router.push("/login")
-    }
-  }, [isLoading, user, router])
-
-  const handleLogout = () => {
-    logout()
-    router.push("/")
-  }
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-muted/30">
-        <div className="w-8 h-8 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      </div>
-    )
-  }
-
-  if (!user) {
-    return null
-  }
-
-  const getInitials = (name?: string) => {
-    if (!name) return "?"
-    return name
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2)
-  }
-
-  const getFirstName = (name?: string) => {
-    if (!name) return "User"
-    return name.split(" ")[0]
-  }
-
+export default function RootLayout({
+  children,
+}: Readonly<{
+  children: React.ReactNode
+}>) {
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-background/80 backdrop-blur-md border-b border-border sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto flex items-center justify-between h-16 px-6">
-          <Link href="/dashboard" className="flex items-center">
-            <img src="/redbyte-logo.png" alt="RedByte" className="h-7" />
-          </Link>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button className="flex items-center gap-2 px-2 py-1 rounded-full hover:bg-secondary transition-colors">
-                <div className="w-8 h-8 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-sm font-medium">
-                  {getInitials(user.full_name)}
-                </div>
-                <span className="text-sm font-medium">{getFirstName(user.full_name)}</span>
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <div className="px-2 py-1.5">
-                <p className="text-sm font-medium">{user.full_name || "User"}</p>
-                <p className="text-xs text-muted-foreground">{user.email || ""}</p>
-              </div>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href="/" className="cursor-pointer">
-                  <Home className="w-4 h-4 mr-2" />
-                  Home
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleLogout} className="text-destructive cursor-pointer">
-                <LogOut className="w-4 h-4 mr-2" />
-                Log out
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto p-6">{children}</main>
-    </div>
+    <html lang="en">
+      <body className={`${inter.variable} font-sans antialiased`}>
+        <AuthProvider>{children}</AuthProvider>
+        <Analytics />
+      </body>
+    </html>
   )
 }

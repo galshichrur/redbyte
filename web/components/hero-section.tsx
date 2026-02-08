@@ -4,7 +4,7 @@ import Link from "next/link"
 
 export function HeroSection() {
   return (
-    <section className="relative pt-40 pb-32 px-6 overflow-hidden">
+    <section className="relative pt-48 pb-40 px-6 overflow-hidden">
       {/* Background gradient elements */}
       <div className="absolute inset-0 -z-10">
         <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
@@ -22,14 +22,14 @@ export function HeroSection() {
       />
 
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-20">
-          <h1 className="opacity-0 animate-fade-up text-4xl md:text-6xl lg:text-7xl font-bold text-foreground leading-[1.1] tracking-tight mb-6 text-balance">
+        <div className="text-center mb-24">
+          <h1 className="opacity-0 animate-fade-up text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-[1.08] tracking-[-0.02em] mb-8 text-balance">
             Protect your network
             <br />
             <span className="text-primary">without the complexity</span>
           </h1>
 
-          <p className="opacity-0 animate-fade-up animation-delay-100 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-10 leading-relaxed text-pretty">
+          <p className="opacity-0 animate-fade-up animation-delay-100 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-[1.6] font-light text-pretty">
             Detect and respond to cyber attacks in real-time. Simple setup, powerful protection.
           </p>
 
@@ -64,22 +64,22 @@ export function HeroSection() {
         </div>
 
         {/* Stats */}
-        <div className="opacity-0 animate-fade-up animation-delay-400 mt-24 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-3xl mx-auto">
+        <div className="opacity-0 animate-fade-up animation-delay-400 mt-28 grid grid-cols-2 md:grid-cols-4 gap-12 max-w-4xl mx-auto">
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground">Real-time</div>
-            <div className="text-sm text-muted-foreground mt-1">Threat detection</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">Real-time</div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">Threat detection</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground">{"<"}1s</div>
-            <div className="text-sm text-muted-foreground mt-1">Alert time</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">{"<"}1s</div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">Alert time</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground">24/7</div>
-            <div className="text-sm text-muted-foreground mt-1">Monitoring</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">24/7</div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">Monitoring</div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-bold text-foreground">5min</div>
-            <div className="text-sm text-muted-foreground mt-1">Setup time</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">5min</div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">Setup time</div>
           </div>
         </div>
       </div>
