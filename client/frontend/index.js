@@ -68,6 +68,13 @@ function spawnBackend() {
       } catch {}
     });
   });
+  
+  cpp.on("exit", (code) => {
+    if (code === 0 && !isQuitting) {
+      isQuitting = true;
+      app.quit();
+    }
+  });
 }
 
 function sendInit() {
