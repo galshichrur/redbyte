@@ -29,11 +29,13 @@ namespace Agent {
             }
 
             if (msg["type"] == "init") {
-                connected = client.connectToServer(SERVER_IP, SERVER_PORT);
-                if (!connected) {
-                    IPC::SendUnableToConnectError();
+                while (!connected) {
+                    connected = client.connectToServer(SERVER_IP, SERVER_PORT);
+                    if (!connected) {
+                        IPC::SendUnableToConnectError();
+                    }
                 }
-                break; // exit init wait loop
+                break;
             }
         }
 
