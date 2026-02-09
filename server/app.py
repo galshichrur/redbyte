@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from api.auth import router as auth_router
 from api.enrollment import enrollment_router
+from api.ws import router as ws_router
 from database import init_db
 from config import Config
 from network.server import TCPServer
@@ -31,6 +32,7 @@ app.add_middleware(
 
 app.include_router(auth_router)
 app.include_router(enrollment_router)
+app.include_router(ws_router)
 
 @app.get("/")
 def root():
