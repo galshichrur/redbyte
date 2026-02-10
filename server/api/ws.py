@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from database import get_db
 from models import Agent
 from services.validate_token import get_current_user_id
-from ws_manager import ws_manager
+from api.ws_manager import ws_manager
 
 
 router = APIRouter()
