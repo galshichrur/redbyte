@@ -1,6 +1,8 @@
 import hashlib
 from datetime import datetime
 from models.agent import Agent
+from api.ws_manager import ws_manager
+from api.ws import agent_to_dict
 
 
 def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostname: str, os: str,
@@ -24,6 +26,12 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
     db.add(agent)
     db.commit()
     db.refresh(agent)
+
+    ws_manager.notify(agent.user_id, {
+        "type": "agent_created",
+        "agent": agent_to_dict(agent),
+    })
+
     return agent
 
 
@@ -36,7 +44,6 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     if agent.secret_hash != agent_secret_hash:
         return None
 
-    # Update agent info
     agent.status = True
     agent.hostname = hostname
     agent.os = os
@@ -47,13 +54,28 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     db.commit()
     db.refresh(agent)
 
+    ws_manager.notify(agent.user_id, {
+        "type": "agent_updated",
+        "agent_id": agent.id,
+        "fields": agent_to_dict(agent),
+    })
+
     return agent
+
 
 def update_agent_status(db, primary_id: int, status: bool) -> bool:
     agent = db.query(Agent).filter(Agent.id == primary_id).first()
     if not agent:
         return False
     agent.status = status
+    agent.disconnected_at = datetime.utcnow()
     db.commit()
     db.refresh(agent)
+
+    ws_manager.notify(agent.user_id, {
+        "type": "agent_updated",
+        "agent_id": agent.id,
+        "fields": agent_to_dict(agent),
+    })
+
     return True
