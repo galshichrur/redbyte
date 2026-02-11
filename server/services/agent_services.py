@@ -1,5 +1,5 @@
 import hashlib
-from datetime import datetime
+from datetime import datetime, UTC
 from models.agent import Agent
 from api.ws_manager import ws_manager
 from api.ws import agent_to_dict
@@ -13,7 +13,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
         user_id=user_id,
         agent_id=agent_id,
         secret_hash=agent_secret_hash,
-        secret_created_at=datetime.utcnow(),
+        secret_created_at=datetime.now(UTC),
 
         status=True,
         hostname=hostname,
@@ -22,6 +22,8 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
         public_ip_addr=public_ip_addr,
         port=port,
         mac_addr=mac_addr,
+
+        connected_at=datetime.now(UTC),
     )
     db.add(agent)
     db.commit()
@@ -51,6 +53,8 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     agent.public_ip_addr = public_ip_addr
     agent.port = port
     agent.mac_addr = mac_addr
+    agent.connected_at = datetime.now(UTC)
+
     db.commit()
     db.refresh(agent)
 
@@ -68,7 +72,11 @@ def update_agent_status(db, primary_id: int, status: bool) -> bool:
     if not agent:
         return False
     agent.status = status
-    agent.disconnected_at = datetime.utcnow()
+    if not status:
+        agent.disconnected_at = datetime.now(UTC)
+    else:
+        agent.connected_at = datetime.now(UTC)
+
     db.commit()
     db.refresh(agent)
 
