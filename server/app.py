@@ -1,3 +1,4 @@
+import asyncio
 from fastapi import FastAPI
 from api.auth import router as auth_router
 from api.enrollment import enrollment_router
@@ -7,11 +8,13 @@ from config import Config
 from network.server import TCPServer
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from api.ws_manager import ws_manager
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    ws_manager.set_loop(asyncio.get_running_loop())
     server = TCPServer()
     server.start_server()
     yield

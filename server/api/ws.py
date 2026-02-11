@@ -32,7 +32,7 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
 async def ws_agents(ws: WebSocket, db: Session = Depends(get_db)):
     user_id = get_current_user_id_ws(ws)
     if not user_id:
-        await ws.close()  # policy violation
+        await ws.close()
         return
 
     # Register WebSocket connection for this user
