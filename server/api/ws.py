@@ -4,7 +4,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 from sqlalchemy.orm import Session
 from database import get_db
 from models import Agent
-from services.validate_token import get_current_user_id
+from services.validate_token import get_current_user_id, get_current_user_id_ws
 from api.ws_manager import ws_manager
 
 
@@ -29,7 +29,11 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
 
 
 @router.websocket("/ws/agents")
-async def ws_agents(ws: WebSocket, user_id: int = Depends(get_current_user_id), db: Session = Depends(get_db)):
+async def ws_agents(ws: WebSocket, db: Session = Depends(get_db)):
+    user_id = get_current_user_id_ws(ws)
+    if not user_id:
+        await ws.close()  # policy violation
+        return
 
     # Register WebSocket connection for this user
     await ws_manager.connect(user_id, ws)

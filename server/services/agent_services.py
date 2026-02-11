@@ -27,7 +27,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
     db.commit()
     db.refresh(agent)
 
-    ws_manager.notify(agent.user_id, {
+    ws_manager.notify_user(agent.user_id, {
         "type": "agent_created",
         "agent": agent_to_dict(agent),
     })
@@ -54,7 +54,7 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     db.commit()
     db.refresh(agent)
 
-    ws_manager.notify(agent.user_id, {
+    ws_manager.notify_user(agent.user_id, {
         "type": "agent_updated",
         "agent_id": agent.id,
         "fields": agent_to_dict(agent),
@@ -72,7 +72,7 @@ def update_agent_status(db, primary_id: int, status: bool) -> bool:
     db.commit()
     db.refresh(agent)
 
-    ws_manager.notify(agent.user_id, {
+    ws_manager.notify_user(agent.user_id, {
         "type": "agent_updated",
         "agent_id": agent.id,
         "fields": agent_to_dict(agent),
