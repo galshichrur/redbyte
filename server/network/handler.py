@@ -1,13 +1,14 @@
 import base64
 import os
+from models.agent import Agent
 from typing import Any, Dict
 from database import get_db
 from network.protocol import MessageType, send_message
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
 
-def \
-        handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
+
+def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     token: str = payload.get("token")
     if token is None:
         return None
@@ -87,3 +88,6 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         send_message(sock, MessageType.AUTH, success_auth_response)
 
     return agent
+
+def handle_alert(sock, sock_addr: tuple[str, int], agent: Agent, payload: Dict[str, Any]):
+    pass
