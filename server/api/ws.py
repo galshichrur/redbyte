@@ -21,8 +21,6 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
         "public_ip_addr": a.public_ip_addr,
         "port": a.port,
         "mac_addr": a.mac_addr,
-        "risk_score": a.risk_score,
-        "under_attack": a.under_attack,
         "connected_at": a.connected_at.isoformat() if a.connected_at else None,
         "disconnected_at": a.disconnected_at.isoformat() if a.disconnected_at else None,
     }

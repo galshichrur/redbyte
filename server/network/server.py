@@ -26,6 +26,7 @@ class TCPServer:
         self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self.socket.bind((self.host, self.port))
         self.socket.listen()
+        self.socket.settimeout(1.0)
         self.is_running = True
         print(f"Server started at {self.host}:{self.port}")
 

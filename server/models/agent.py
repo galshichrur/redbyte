@@ -28,8 +28,3 @@ class Agent(Base):
     first_seen = Column(DateTime, server_default=func.now())
     connected_at = Column(DateTime)
     disconnected_at = Column(DateTime)
-
-    # Security
-    risk_score = Column(Integer, default=0)
-    under_attack = Column(Boolean, default=False)
-
