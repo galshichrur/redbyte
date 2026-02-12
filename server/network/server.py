@@ -1,11 +1,10 @@
 import socket
 import threading
-from network.handler import handle_enroll, handle_auth
+from network.handler import handle_enroll, handle_auth, handle_alert
 from network.protocol import recv_message, MessageType
 from services.agent_services import update_agent_status
 from config import Config
 from database import get_db
-
 
 
 class TCPServer:
@@ -67,43 +66,55 @@ class TCPServer:
         print(f"Client connected from {client_addr[0]}:{client_addr[1]}")
 
         agent = None
-        established = False
 
         try:
+            # Handshake phase, only ENROLL or AUTH messages allowed.
+            msg_type, payload = recv_message(client_sock)
+
+            if msg_type == MessageType.ENROLL:
+                agent = handle_enroll(client_sock, client_addr, payload)
+
+            elif msg_type == MessageType.AUTH:
+                agent = handle_auth(client_sock, client_addr, payload)
+
+            else:
+                print("Invalid connection establish message type: ", msg_type)
+                return  # Close connection
+
+            if not agent:
+                print(f"Authentication failed for {client_addr}")
+                return  # Close connection
+
+            print(f"Connection established with agent {agent.id}.")
+
+            # Enrolled connection phase
             while self.is_running:
-                msg_type, payload = recv_message(client_sock)
-                print(f"Received message from {client_addr}: type={msg_type}\t payload={payload}")
+                try:
+                    msg_type, payload = recv_message(client_sock)
+                except ConnectionResetError:
+                    break  # Client disconnected forcefully
 
-                # Handshake phase
-                if not established:
-                    if msg_type == MessageType.ENROLL:
-                        agent = handle_enroll(client_sock, client_addr, payload)
+                if not msg_type:
+                        break  # Client close connection (empty message)
 
-                    elif msg_type == MessageType.AUTH:
-                        agent = handle_auth(client_sock, client_addr, payload)
-
-                    else:
-                        print("Invalid connection establish message type: ", msg_type)
-                        break
-
-                    if agent is None:
-                        print("Received invalid message.")
-                        continue
-
-                    established = True
-                    print(f"Connection established with agent {agent.id}.")
-                    continue
+                if msg_type == MessageType.ALERT:
+                    handle_alert(client_sock, client_addr, payload)
+                elif msg_type == MessageType.TERMINATE:
+                    print(f"Client {agent.id} terminated the connection.")
+                    break
+                else:
+                    print(f"Unknown message type receive from agent {agent.id}. Received: {msg_type}")
 
         except Exception as e:
             print(e)
 
         finally:
+            if agent:
+                update_agent_status(next(get_db()), agent.id, False)
+
             # Close client connection
             client_sock.close()
             print(f"Client disconnected from {client_addr[0]}:{client_addr[1]}")
 
             with self.lock:
                 self.client_threads.discard(threading.current_thread())
-
-            if agent is not None:
-                update_agent_status(next(get_db()), agent.id, False)
