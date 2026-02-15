@@ -1,7 +1,7 @@
 {
   "name": "redbyte",
   "main": "index.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder"
@@ -23,6 +23,13 @@
     "nsis": {
       "include": "build/installer.nsh"
     },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "galshichrur",
+        "repo": "redbyte"
+      }
+    ],
     "extraResources": [
       {
         "from": "../backend/cmake-build-debug/bin/agent.exe",

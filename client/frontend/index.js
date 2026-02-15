@@ -1,6 +1,9 @@
 const { app, BrowserWindow, ipcMain, Tray, Menu } = require("electron");
 const { spawn } = require("child_process");
 const path = require("path");
+const { autoUpdater } = require("electron-updater");
+
+autoUpdater.checkForUpdatesAndNotify();
 
 let win = null;
 let tray = null;
