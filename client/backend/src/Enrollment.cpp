@@ -12,7 +12,7 @@ namespace Enrollment {
         HKEY hKey;
 
         if (RegOpenKeyExA(
-            HKEY_LOCAL_MACHINE,
+            HKEY_CURRENT_USER,
             "SOFTWARE\\RedByte\\Agent",
             0,
             KEY_READ,
@@ -81,7 +81,7 @@ namespace Enrollment {
         HKEY hKey;
 
         if (RegCreateKeyExA(
-            HKEY_LOCAL_MACHINE,
+            HKEY_CURRENT_USER,
             "SOFTWARE\\RedByte\\Agent",
             0,
             nullptr,
