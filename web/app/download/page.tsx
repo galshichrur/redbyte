@@ -33,7 +33,7 @@ export default function DownloadPage() {
             </p>
 
             <a 
-              href="https://github.com/galshichrur/redbyte/releases/download/production/RedByte.Setup.0.1.0.exe"
+              href="https://github.com/galshichrur/redbyte/releases/latest/download/redbyte-installer.exe"
               download
             >
               <Button size="lg" className="text-base px-10 py-6 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow">
