@@ -1,7 +1,7 @@
 !macro customInstall
-  ExecWait '"$SYSDIR\schtasks.exe" /create /f /sc onlogon /rl highest /tn RedByteAgent /tr "\"$INSTDIR\resources\backend\agent.exe\""'
+  WriteRegStr HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "RedByteAgent" '"$INSTDIR\resources\backend\agent.exe"'
 !macroend
 
 !macro customUnInstall
-  ExecWait '"$SYSDIR\schtasks.exe" /delete /f /tn RedByteAgent'
+  DeleteRegValue HKCU "Software\Microsoft\Windows\CurrentVersion\Run" "RedByteAgent"
 !macroend
