@@ -17,6 +17,7 @@ add_executable(agent
         src/network/Client.cpp
         src/IPC.cpp
         src/information/SystemInfo.cpp
+        src/Startup.cpp
 )
 
 target_include_directories(agent PRIVATE src)
