@@ -77,7 +77,7 @@ export function RegisterForm() {
         <Input
           id="fullName"
           type="text"
-          placeholder="John Doe"
+          placeholder=""
           value={formData.fullName}
           onChange={(e) => {
             setFormData({ ...formData, fullName: e.target.value })
@@ -93,7 +93,7 @@ export function RegisterForm() {
         <Input
           id="email"
           type="email"
-          placeholder="you@example.com"
+          placeholder="support@redbyte.app"
           value={formData.email}
           onChange={(e) => {
             setFormData({ ...formData, email: e.target.value })
