@@ -1,11 +1,12 @@
-#include "SystemInfo.h"
-#include <iphlpapi.h>
+#include <winsock2.h>
 #include <windows.h>
+#include <iphlpapi.h>
+#include "SystemInfo.h"
 #include <cstdio>
 #include <string>
+
 #pragma comment(lib, "iphlpapi.lib")
 #pragma comment(lib, "ws2_32.lib")
-
 
 AgentInfo collect_agent_info() {
     AgentInfo info;
