@@ -10,7 +10,11 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-add_executable(agent
+if (MSVC)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+endif()
+
+add_executable(agent WIN32
         src/main.cpp
         src/Enrollment.cpp
         src/Agent.cpp
@@ -26,14 +30,7 @@ if (WIN32)
     target_link_libraries(agent
             PRIVATE
             iphlpapi
-            ws2_32)
-endif()
-
-if (MINGW)
-    target_link_options(agent PRIVATE
-            -static
-            -static-libgcc
-            -static-libstdc++
+            ws2_32
     )
 endif()
 
