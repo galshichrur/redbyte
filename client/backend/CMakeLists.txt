@@ -14,7 +14,7 @@ if (MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
 endif()
 
-add_executable(agent
+add_executable(agent WIN32
         src/main.cpp
         src/Enrollment.cpp
         src/Agent.cpp

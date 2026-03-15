@@ -1,7 +1,7 @@
 {
   "name": "redbyte",
   "main": "index.js",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "scripts": {
     "start": "electron .",
     "build": "electron-builder --win --publish never"
@@ -33,7 +33,7 @@
     ],
     "extraResources": [
       {
-        "from": "../backend/cmake-build-debug/bin/agent.exe",
+        "from": "../backend/build/bin/Release/agent.exe",
         "to": "backend/agent.exe"
       }
     ]
