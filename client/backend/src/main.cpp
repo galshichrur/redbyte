@@ -5,7 +5,7 @@ int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR, int) {
     HANDLE hMutex = CreateMutexA(
         nullptr,
         TRUE,
-        "Global\\RedByteAgentMutex"
+        "RedByteAgentMutex"
     );
 
     // Agent already running
