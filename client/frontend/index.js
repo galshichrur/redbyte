@@ -60,9 +60,12 @@ function createTray() {
 function spawnBackend() {
   const exePath = app.isPackaged
     ? path.join(process.resourcesPath, "backend", "agent.exe")
-    : path.join(__dirname, "../backend", "cmake-build-debug", "bin", "agent.exe");
+    : path.join(__dirname, "../backend/build/bin/Release/agent.exe");
 
-  cpp = spawn(exePath);
+  cpp = spawn(exePath, [], {
+    windowsHide: true,
+    stdio: ["pipe", "pipe", "pipe"]
+  });
 
   cpp.stdout.on("data", (data) => {
     data.toString().split(/\r?\n/).filter(Boolean).forEach(line => {
@@ -71,11 +74,12 @@ function spawnBackend() {
       } catch {}
     });
   });
-  
+
   cpp.on("exit", (code) => {
-    if (code === 0 && !isQuitting) {
-      isQuitting = true;
-      app.quit();
+    console.log("Backend exited:", code);
+
+    if (!isQuitting) {
+      setTimeout(spawnBackend, 2000);
     }
   });
 }
