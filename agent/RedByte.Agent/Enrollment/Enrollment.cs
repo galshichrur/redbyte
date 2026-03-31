@@ -1,21 +1,58 @@
+using RedByte.Agent.Network;
+
 namespace RedByte.Agent.Enrollment;
 using System;
 using Microsoft.Win32;
 
-public class Enrollment
+public static class Enrollment
 {
     const string RegistryPath = @"SOFTWARE\RedByte\Agent";
     
     // Validate the given enrollment token.
-    public bool ValidateEnrollmentToken(string token)
+    public static async Task<bool> ValidateEnrollmentToken(string token)
     {
+        EnrollSendMessage request = new EnrollSendMessage(token);
+
+        TcpClientManager client = TcpClientManager.GetInstance();
+
+        bool connected = await client.Connect();
+        if (!connected)
+            throw new Exception("Could not connect to server.");
+
+        await client.Send(request);
+        EnrollResponseMessage? response = await client.Receive<EnrollResponseMessage>();
         
+        if (response == null)
+            return false;
+        
+        if (response.type != "ENROLL")
+            return false;
+        
+        StoreCredentials(response.agent_id, response.agent_secret);
+        
+        return true;
     }
     
     // Validate the stored agent credentials with the server.
-    public bool ValidateCredentials(AgentCredentials credentials)
+    public static async Task<bool> ValidateCredentials(string agentId, string agentSecret)
     {
+        AuthSendMessage request = new AuthSendMessage(agentId, agentSecret);
         
+        TcpClientManager client = TcpClientManager.GetInstance();
+
+        bool connected = await client.Connect();
+        if (!connected)
+            throw new Exception("Could not connect to server.");
+
+        await client.Send(request);
+        AuthResponseMessage? response = await client.Receive<AuthResponseMessage>();
+        
+        if (response == null)
+            return false;
+        if (response.type != "AUTH")
+            return false;
+        
+        return response.status;
     }
     
     // Checks if the registry contains the agent credentials, if true returns them, else returns null

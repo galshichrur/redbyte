@@ -10,6 +10,7 @@ public class TcpClientManager
     private static TcpClientManager? _instance;
     private TcpClient _client;
     private NetworkStream _stream;
+    private const int DefaultPort = 9000;
 
     public static TcpClientManager GetInstance()
     {
@@ -23,7 +24,7 @@ public class TcpClientManager
         try
         {
             _client = new TcpClient();
-            await _client.ConnectAsync(GetServerIp(), 8000);
+            await _client.ConnectAsync(GetServerIp(), DefaultPort);
             _stream = _client.GetStream();
             return true;
         }

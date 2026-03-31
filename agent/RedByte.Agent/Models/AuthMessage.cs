@@ -1,10 +1,11 @@
 using RedByte.Agent.Enrollment;
-
 namespace RedByte.Agent.Network;
 
-public class EnrollMessage
+public class AuthSendMessage
 {
     public string type;
+    public string agent_id;
+    public string agent_secret;
     public string token;
     public string hostname;
     public string os;
@@ -14,10 +15,11 @@ public class EnrollMessage
     public string network_type;
     public string username;
 
-    public EnrollMessage(string token)
+    public AuthSendMessage(string agentId, string agentSecret)
     {
-        this.token = token;
-        this.type = "ENROLL";
+        this.agent_id = agentId;
+        this.agent_secret = agentSecret;
+        this.type = "AUTH";
         this.hostname = SystemInformation.GetHostname();
         this.os = SystemInformation.GetOS();
         this.local_ip = SystemInformation.GetLocalIP();
@@ -26,4 +28,10 @@ public class EnrollMessage
         this.network_type = SystemInformation.GetNetworkType();
         this.username = SystemInformation.GetUsername();
     }
+}
+
+public class AuthResponseMessage
+{
+    public string type;
+    public bool status;
 }

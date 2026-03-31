@@ -15,4 +15,8 @@
       <Resource Include="Assets\icon.ico" />
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Include="NSec.Cryptography" Version="25.4.0" />
+    </ItemGroup>
+
 </Project>
