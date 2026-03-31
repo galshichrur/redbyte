@@ -1,7 +1,7 @@
 import socket
 import threading
 from network.handler import handle_enroll, handle_auth, handle_alert
-from network.protocol import recv_message, MessageType
+from network.protocol import recv_message
 from services.agent_services import update_agent_status
 from config import Config
 from database import get_db
@@ -70,12 +70,13 @@ class TCPServer:
 
         try:
             # Handshake phase, only ENROLL or AUTH messages allowed.
-            msg_type, payload = recv_message(client_sock)
+            payload = recv_message(client_sock)
+            msg_type = payload.get("type")
 
-            if msg_type == MessageType.ENROLL:
+            if msg_type == "ENROLL":
                 agent = handle_enroll(client_sock, client_addr, payload)
 
-            elif msg_type == MessageType.AUTH:
+            elif msg_type == "AUTH":
                 agent = handle_auth(client_sock, client_addr, payload)
 
             else:
@@ -91,16 +92,17 @@ class TCPServer:
             # Enrolled connection phase
             while self.is_running:
                 try:
-                    msg_type, payload = recv_message(client_sock)
+                    payload = recv_message(client_sock)
+                    msg_type = payload.get("type")
                 except ConnectionResetError:
                     break  # Client disconnected forcefully
 
                 if not msg_type:
                         break  # Client close connection (empty message)
 
-                if msg_type == MessageType.ALERT:
+                if msg_type == "ALERT":
                     handle_alert(client_sock, client_addr, agent, payload)
-                elif msg_type == MessageType.TERMINATE:
+                elif msg_type == "TERMINATE":
                     print(f"Client {agent.id} terminated the connection.")
                     break
                 else:
