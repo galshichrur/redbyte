@@ -1,0 +1,18 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <None Remove="Assets\redbyte-logo.png" />
+      <Resource Include="Assets\redbyte-logo.png" />
+      <None Remove="Assets\icon.ico" />
+      <Resource Include="Assets\icon.ico" />
+    </ItemGroup>
+
+</Project>
