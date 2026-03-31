@@ -36,7 +36,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         hostname=payload.get("hostname"),
         os=payload.get("os"),
         local_ip_addr=payload.get("local_ip"),
-        public_ip_addr=payload.get("public_ip"),
+        public_ip_addr=sock_addr[0],
         port=sock_addr[1],
         mac_addr=payload.get("mac"),
         network_type=payload.get("network_type"),
@@ -75,7 +75,7 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         hostname = payload.get("hostname"),
         os = payload.get("os"),
         local_ip_addr = payload.get("local_ip"),
-        public_ip_addr = payload.get("public_ip"),
+        public_ip_addr = sock_addr[0],
         port = sock_addr[1],
         mac_addr = payload.get("mac"),
         network_type = payload.get("network_type"),
@@ -84,13 +84,13 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
 
     if agent is None:
         fail_auth_response = {
-            "type": "ENROLL",
+            "type": "AUTH",
             "status": False,
         }
         send_message(sock, fail_auth_response)
     else:
         success_auth_response = {
-            "type": "ENROLL",
+            "type": "AUTH",
             "status": True,
         }
         send_message(sock, success_auth_response)

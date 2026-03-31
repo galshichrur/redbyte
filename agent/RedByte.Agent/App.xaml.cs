@@ -8,7 +8,7 @@ public partial class App : Application
 {
     // Prevent from running the application twice or more
     private static Mutex _mutex = null;
-    protected override void OnStartup(StartupEventArgs e)
+    protected override async void OnStartup(StartupEventArgs e)
     {
         const string appName = "RedByteAgentMutex";
         bool createdNew;
@@ -19,7 +19,21 @@ public partial class App : Application
             Application.Current.Shutdown();
             return;
         }
-
+        
         base.OnStartup(e);
+        
+        bool isValid = await Enrollment.Enrollment.ValidateCredentials();
+        if (isValid)
+        {
+            var statusWindow = new StatusWindow();
+            Current.MainWindow = statusWindow;
+            statusWindow.Show();
+        }
+        else
+        {
+            var enrollWindow = new EnrollWindow();
+            Current.MainWindow = enrollWindow;
+            enrollWindow.Show();
+        }
     }
 }

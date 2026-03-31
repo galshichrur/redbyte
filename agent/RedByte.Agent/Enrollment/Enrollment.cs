@@ -18,7 +18,7 @@ public static class Enrollment
         bool connected = await client.Connect();
         if (!connected)
             throw new Exception("Could not connect to server.");
-
+        
         await client.Send(request);
         EnrollResponseMessage? response = await client.Receive<EnrollResponseMessage>();
         
@@ -27,15 +27,24 @@ public static class Enrollment
         
         if (response.type != "ENROLL")
             return false;
+        if (response.status == false)
+            return false;
         
         StoreCredentials(response.agent_id, response.agent_secret);
-        
         return true;
     }
     
     // Validate the stored agent credentials with the server.
-    public static async Task<bool> ValidateCredentials(string agentId, string agentSecret)
+    public static async Task<bool> ValidateCredentials()
     {
+        var credentials = GetCredentials();
+        
+        if (credentials == null)
+            return false;
+
+        string agentId = credentials.Value.Item1;
+        string agentSecret = credentials.Value.Item2;
+        
         AuthSendMessage request = new AuthSendMessage(agentId, agentSecret);
         
         TcpClientManager client = TcpClientManager.GetInstance();
@@ -55,11 +64,11 @@ public static class Enrollment
         return response.status;
     }
     
-    // Checks if the registry contains the agent credentials, if true returns them, else returns null
-    private static AgentCredentials? GetCredentials()
+    // Checks if the registry contains the agentId and agentSecret, if true returns them, else returns null
+    private static (string, string)? GetCredentials()
     {
-        // Open the HKLM key in read only mode
-        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryPath))
+        // Open the HKCU key in read only mode
+        using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath))
         {
             if (key == null)
             {
@@ -71,11 +80,7 @@ public static class Enrollment
 
             if (!string.IsNullOrEmpty(agentId) && !string.IsNullOrEmpty(agentSecret))
             {
-                return new AgentCredentials
-                {
-                    AgentId = agentId,
-                    AgentSecret = agentSecret
-                };
+                return (agentId, agentSecret);
             }
 
             return null;
@@ -87,19 +92,18 @@ public static class Enrollment
     {
         try
         {
-            using (RegistryKey key = Registry.LocalMachine.CreateSubKey(RegistryPath))
+            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryPath))
             {
                 if (key == null) return false;
 
                 key.SetValue("AgentId", agentId, RegistryValueKind.String);
                 key.SetValue("AgentSecret", agentSecret, RegistryValueKind.String);
-            
+        
                 return true;
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex.Message);
             return false;
         }
     }

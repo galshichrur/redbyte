@@ -4,15 +4,15 @@ namespace RedByte.Agent.Network;
 
 public class EnrollSendMessage
 {
-    public string type;
-    public string token;
-    public string hostname;
-    public string os;
-    public string local_ip;
-    public string public_ip;
-    public string mac;
-    public string network_type;
-    public string username;
+    public string type { get; set; }
+    public string token { get; set; }
+    public string hostname { get; set; }
+    public string os { get; set; }
+    public string local_ip { get; set; }
+    public string public_ip { get; set; }
+    public string mac { get; set; }
+    public string network_type { get; set; }
+    public string username { get; set; }
 
     public EnrollSendMessage(string token)
     {
@@ -30,8 +30,8 @@ public class EnrollSendMessage
 
 public class EnrollResponseMessage
 {
-    public string type;
-    public bool status;
-    public string agent_id;
-    public string agent_secret;
+    public string type { get; set; }
+    public bool status { get; set; }
+    public string agent_id { get; set; }
+    public string agent_secret { get; set; }
 }
