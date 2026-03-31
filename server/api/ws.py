@@ -1,10 +1,9 @@
 import base64
 from typing import Any
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
-from sqlalchemy.orm import Session
-from database import get_db
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from database import SessionLocal
 from models import Agent
-from services.validate_token import get_current_user_id, get_current_user_id_ws
+from services.validate_token import get_current_user_id_ws
 from api.ws_manager import ws_manager
 
 
@@ -21,13 +20,20 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
         "public_ip_addr": a.public_ip_addr,
         "port": a.port,
         "mac_addr": a.mac_addr,
+        "network_type": a.network_type,
+        "username": a.username,
         "connected_at": a.connected_at.isoformat() if a.connected_at else None,
         "disconnected_at": a.disconnected_at.isoformat() if a.disconnected_at else None,
     }
 
+def format_agents(user_id: int) -> list[dict[str, Any]]:
+    with SessionLocal() as db:
+        agents = db.query(Agent).filter(Agent.user_id == user_id).all()
+        return [agent_to_dict(a) for a in agents]
+
 
 @router.websocket("/ws/agents")
-async def ws_agents(ws: WebSocket, db: Session = Depends(get_db)):
+async def ws_agents(ws: WebSocket):
     user_id = get_current_user_id_ws(ws)
     if not user_id:
         await ws.close()
@@ -38,10 +44,11 @@ async def ws_agents(ws: WebSocket, db: Session = Depends(get_db)):
 
     try:
         # Send initial snapshot of all user's agents
-        agents = db.query(Agent).filter(Agent.user_id == user_id).all()
+        agents_data = format_agents(user_id)
+
         await ws.send_json({
             "type": "snapshot",
-            "agents": [agent_to_dict(a) for a in agents],
+            "agents": agents_data,
         })
 
         # Keep the connection alive
