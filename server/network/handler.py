@@ -37,7 +37,9 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         local_ip_addr=payload.get("local_ip"),
         public_ip_addr=sock_addr[0],
         port=sock_addr[1],
-        mac_addr=payload.get("mac")
+        mac_addr=payload.get("mac"),
+        network_type=payload.get("network_type"),
+        username=payload.get("username")
     )
 
     # Encode to base64 format for sending in JSON
@@ -73,7 +75,9 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         local_ip_addr = payload.get("local_ip"),
         public_ip_addr = sock_addr[0],
         port = sock_addr[1],
-        mac_addr = payload.get("mac")
+        mac_addr = payload.get("mac"),
+        network_type = payload.get("network_type"),
+        username = payload.get("username")
     )
 
     if agent is None:

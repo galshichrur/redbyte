@@ -23,6 +23,8 @@ class Agent(Base):
     public_ip_addr = Column(String)  # from TCP connection
     port = Column(Integer)  # from TCP connection
     mac_addr = Column(String)
+    network_type = Column(String)
+    username = Column(String)
 
     # Connectivity
     first_seen = Column(DateTime, server_default=func.now())
