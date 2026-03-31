@@ -18,6 +18,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     # Send fail error ENROLL message
     if user is None:
         fail_enroll_response = {
+            "type": "ENROLL",
             "status": False
         }
         send_message(sock, fail_enroll_response)
@@ -48,6 +49,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
 
     # Send success ENROLL message
     success_enroll_response = {
+        "type": "ENROLL",
         "status": True,
         "agent_id": agent_id_b64,
         "agent_secret": agent_secret_b64,
@@ -82,11 +84,13 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
 
     if agent is None:
         fail_auth_response = {
+            "type": "ENROLL",
             "status": False,
         }
         send_message(sock, fail_auth_response)
     else:
         success_auth_response = {
+            "type": "ENROLL",
             "status": True,
         }
         send_message(sock, success_auth_response)
