@@ -8,7 +8,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-sm space-y-8">
         <div className="flex flex-col items-center gap-6">
           <Link href="/">
-            <Image src="/redbyte-logo.png" alt="RedByte" width={220} className="dark:invert-0" />
+            <Image src="/redbyte-logo.png" alt="RedByte" height={100} width={220} className="dark:invert-0" />
           </Link>
           <div className="space-y-1.5 text-center">
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">Create account</h1>
