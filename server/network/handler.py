@@ -99,7 +99,19 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
 
     return agent
 
-def handle_alert(sock, sock_addr: tuple[str, int], agent: Agent, payload: Dict[str, Any]):
+def handle_alert(agent: Agent, payload: Dict[str, Any]):
 
-    detected_at_dt = datetime.(payload.get("timestamp"), "%Y-%m-%d %H:%m:%S")
-    event = create_event()
+    event = create_event(
+        db = next(get_db()),
+        user_id = agent.user_id,
+        agent_id = agent.agent_id,
+        event_type = payload.get("event_type"),
+        name=payload.get("name"),
+        severity=payload.get("severity"),
+        description=payload.get("description"),
+        is_blocked=payload.get("is_blocked"),
+        suspected_ip=payload.get("suspected_ip"),
+        detected_at=payload.get("detected_at"),
+    )
+
+    return event

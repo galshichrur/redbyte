@@ -100,7 +100,8 @@ class TCPServer:
                         break  # Client close connection (empty message)
 
                 if msg_type == "ALERT":
-                    handle_alert(client_sock, client_addr, agent, payload)
+                    handle_alert(agent, payload)
+
                 elif msg_type == "TERMINATE":
                     print(f"Client {agent.id} terminated the connection.")
                     break

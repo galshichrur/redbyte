@@ -2,7 +2,7 @@ import hashlib
 from datetime import datetime, UTC
 from models.agent import Agent
 from ws.ws_manager import ws_manager
-from ws.agents import agent_to_dict
+from ws.main import agent_to_dict
 
 
 def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostname: str, os: str,
@@ -32,7 +32,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
     db.refresh(agent)
 
     ws_manager.notify(agent.user_id, {
-        "type": "agent_created",
+        "type": "agent.created",
         "agent": agent_to_dict(agent),
     })
 
@@ -63,7 +63,7 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     db.refresh(agent)
 
     ws_manager.notify(agent.user_id, {
-        "type": "agent_updated",
+        "type": "agent.updated",
         "agent_id": agent.id,
         "fields": agent_to_dict(agent),
     })
@@ -85,7 +85,7 @@ def update_agent_status(db, primary_id: int, status: bool) -> bool:
     db.refresh(agent)
 
     ws_manager.notify(agent.user_id, {
-        "type": "agent_updated",
+        "type": "agent.updated",
         "agent_id": agent.id,
         "fields": agent_to_dict(agent),
     })

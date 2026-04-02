@@ -1,7 +1,7 @@
 from datetime import datetime
 from models.event import Event
 from ws.ws_manager import ws_manager
-from ws.events import event_to_dict
+from ws.main import event_to_dict
 
 
 def create_event(db, user_id: int, agent_id: int, event_type: str, name: str, severity: int,
@@ -17,6 +17,7 @@ def create_event(db, user_id: int, agent_id: int, event_type: str, name: str, se
         description=description,
         is_blocked=is_blocked,
         suspected_ip=suspected_ip,
+
         detected_at=detected_at
     )
     db.add(event)
@@ -24,7 +25,7 @@ def create_event(db, user_id: int, agent_id: int, event_type: str, name: str, se
     db.refresh(event)
 
     ws_manager.notify(user_id, {
-        "type": "event_created",
+        "type": "event.created",
         "event": event_to_dict(event),
     })
 
