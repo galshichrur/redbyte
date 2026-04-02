@@ -1,10 +1,10 @@
 import base64
 from typing import Any
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
-from database import SessionLocal
-from models import Agent
 from services.validate_token import get_current_user_id_ws
 from ws.ws_manager import ws_manager
+from database import SessionLocal
+from models import Agent, Event
 
 
 router = APIRouter()
@@ -26,14 +26,33 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
         "disconnected_at": a.disconnected_at.isoformat() if a.disconnected_at else None,
     }
 
-def format_agents(user_id: int) -> list[dict[str, Any]]:
+def event_to_dict(e: Event) -> dict[str, Any]:
+    return {
+        "id": e.id,
+        "agent_id": e.agent_id,
+        "event_type": e.event_type,
+        "name": e.name,
+        "severity": e.severity,
+        "description": e.description,
+        "is_blocked": e.is_blocked,
+        "suspected_ip": e.suspected_ip,
+        "detected_at": e.detected_at.isoformat() if e.detected_at else None,
+        "received_at": e.received_at.isoformat() if e.received_at else None,
+    }
+
+
+def get_snapshot(user_id: int):
     with SessionLocal() as db:
         agents = db.query(Agent).filter(Agent.user_id == user_id).all()
-        return [agent_to_dict(a) for a in agents]
+        events = db.query(Event).filter(Event.user_id == user_id).all()
 
+        return {
+            "agents": [agent_to_dict(a) for a in agents],
+            "events": [event_to_dict(e) for e in events],
+        }
 
-@router.websocket("/ws/agents")
-async def ws_agents(ws: WebSocket):
+@router.websocket("/ws")
+async def ws_main(ws: WebSocket):
     user_id = get_current_user_id_ws(ws)
     if not user_id:
         await ws.close()
@@ -44,11 +63,11 @@ async def ws_agents(ws: WebSocket):
 
     try:
         # Send initial snapshot of all user's agents
-        agents_data = format_agents(user_id)
+        snapshot = get_snapshot(user_id)
 
         await ws.send_json({
             "type": "snapshot",
-            "agents": agents_data,
+            **snapshot
         })
 
         # Keep the connection alive
