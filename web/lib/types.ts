@@ -7,7 +7,10 @@ export interface Agent {
   public_ip_addr: string
   port: number
   mac_addr: string
+  network_type: string
+  username: string
   under_attack: boolean
+  first_seen: string
   connected_at: string | null
   disconnected_at: string | null
 }

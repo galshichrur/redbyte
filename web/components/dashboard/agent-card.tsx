@@ -1,7 +1,7 @@
 "use client"
 
 import type { Agent } from "@/lib/types"
-import { Monitor, ShieldAlert } from "lucide-react"
+import { Monitor, ShieldAlert, Network, User, Wifi, Globe, Hash, Clock, CalendarClock, CircleSlash } from "lucide-react"
 
 function formatDateTime(dateStr: string | null): string {
   if (!dateStr) return "Never"
@@ -29,6 +29,31 @@ function formatRelativeTime(dateStr: string | null): string {
   return `${days}d ago`
 }
 
+function InfoRow({
+  icon: Icon,
+  label,
+  value,
+  mono = false,
+}: {
+  icon: React.ElementType
+  label: string
+  value: string | number | null | undefined
+  mono?: boolean
+}) {
+  const display = value != null && value !== "" ? String(value) : "—"
+  return (
+    <div className="flex items-start gap-3">
+      <div className="mt-0.5 w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0">
+        <Icon className="w-3.5 h-3.5 text-muted-foreground" />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">{label}</div>
+        <div className={`text-sm text-foreground font-medium truncate ${mono ? "font-mono" : ""}`}>{display}</div>
+      </div>
+    </div>
+  )
+}
+
 export function AgentCard({ agent }: { agent: Agent }) {
   const isOnline = agent.status
   const isAttacked = agent.under_attack
@@ -40,80 +65,123 @@ export function AgentCard({ agent }: { agent: Agent }) {
       bg-card rounded-xl border transition-all duration-200
       ${
         isAttacked
-          ? "border-destructive/30"
+          ? "border-destructive/40 shadow-sm shadow-destructive/10"
           : isOnline
-            ? "border-border hover:border-primary/20"
-            : "border-border opacity-70 hover:opacity-100"
+            ? "border-border hover:border-primary/30"
+            : "border-border opacity-75 hover:opacity-100"
       }
     `}
     >
-      <div className="p-8">
-        <div className="flex items-start justify-between mb-8">
-          <div className="flex items-center gap-4">
+      {/* Header */}
+      <div className="px-6 pt-6 pb-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
             <div
               className={`
-              w-14 h-14 rounded-xl flex items-center justify-center shrink-0
+              w-12 h-12 rounded-xl flex items-center justify-center shrink-0
               ${isAttacked ? "bg-destructive/10" : isOnline ? "bg-primary/10" : "bg-muted"}
             `}
             >
               <Monitor
-                className={`w-6 h-6 ${isAttacked ? "text-destructive" : isOnline ? "text-primary" : "text-muted-foreground"}`}
+                className={`w-5 h-5 ${isAttacked ? "text-destructive" : isOnline ? "text-primary" : "text-muted-foreground"}`}
               />
             </div>
             <div className="min-w-0">
-              <h3 className="text-lg font-semibold text-foreground tracking-tight">{agent.hostname}</h3>
-              <p className="text-sm text-muted-foreground mt-1">{agent.os}</p>
+              <h3 className="text-base font-semibold text-foreground tracking-tight leading-tight truncate">
+                {agent.hostname || "Unknown Host"}
+              </h3>
+              <p className="text-xs text-muted-foreground mt-0.5 truncate">{agent.os || "Unknown OS"}</p>
+              {agent.username && (
+                <p className="text-xs text-muted-foreground/70 mt-0.5 truncate">
+                  <span className="font-mono">{agent.username}</span>
+                </p>
+              )}
             </div>
           </div>
-          <div className="flex flex-col items-end gap-2">
+
+          <div className="flex flex-col items-end gap-1.5 shrink-0">
             {isAttacked && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-destructive/10 text-destructive text-xs font-semibold">
-                <ShieldAlert className="w-4 h-4" />
+              <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-destructive/10 text-destructive text-xs font-semibold">
+                <ShieldAlert className="w-3.5 h-3.5" />
                 Threat
               </div>
             )}
             <div
-              className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold ${
+              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold ${
                 isOnline ? "bg-emerald-500/10 text-emerald-600" : "bg-muted text-muted-foreground"
               }`}
             >
               <div
-                className={`w-2 h-2 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40"}`}
+                className={`w-1.5 h-1.5 rounded-full ${isOnline ? "bg-emerald-500 animate-pulse" : "bg-muted-foreground/40"}`}
               />
               {isOnline ? "Online" : "Offline"}
             </div>
           </div>
         </div>
+      </div>
 
-        <div className="grid grid-cols-2 gap-8">
-          <div className="space-y-6">
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Local IP</div>
-              <div className="text-base text-foreground font-medium">{agent.local_ip_addr}</div>
-            </div>
+      {/* Divider */}
+      <div className="h-px bg-border/60 mx-6" />
 
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">MAC Address</div>
-              <div className="text-base text-foreground font-medium">{agent.mac_addr}</div>
-            </div>
-          </div>
-
-          <div className="space-y-6">
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Public IP</div>
-              <div className="text-base text-foreground font-medium">{agent.public_ip_addr}</div>
-            </div>
-
-            <div>
-              <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">Port</div>
-              <div className="text-base text-foreground font-medium">{agent.port}</div>
-            </div>
-          </div>
+      {/* Network section */}
+      <div className="px-6 py-5">
+        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Network</div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <InfoRow icon={Wifi} label="Local IP" value={agent.local_ip_addr} mono />
+          <InfoRow icon={Globe} label="Public IP" value={agent.public_ip_addr} mono />
+          <InfoRow icon={Hash} label="Port" value={agent.port} mono />
+          <InfoRow icon={Network} label="MAC Address" value={agent.mac_addr} mono />
+          <InfoRow icon={Network} label="Network Type" value={agent.network_type} />
+          <InfoRow icon={User} label="Username" value={agent.username} mono />
         </div>
+      </div>
 
-        <div className="mt-8 pt-8 border-t border-border/50">
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2">{isOnline ? "Connected" : "Disconnected"}</div>
-          <div className="text-base text-foreground font-medium">{formatRelativeTime(connectionTime)} • {formatDateTime(connectionTime)}</div>
+      {/* Divider */}
+      <div className="h-px bg-border/60 mx-6" />
+
+      {/* Timestamps section */}
+      <div className="px-6 py-5">
+        <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">Connectivity</div>
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0">
+              <CalendarClock className="w-3.5 h-3.5 text-muted-foreground" />
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">First Seen</div>
+              <div className="text-sm text-foreground font-medium">{formatDateTime(agent.first_seen)}</div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className={`w-7 h-7 rounded-md flex items-center justify-center shrink-0 ${isOnline ? "bg-emerald-500/10" : "bg-muted"}`}>
+              <Clock className={`w-3.5 h-3.5 ${isOnline ? "text-emerald-500" : "text-muted-foreground"}`} />
+            </div>
+            <div>
+              <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">
+                {isOnline ? "Connected" : "Last Connected"}
+              </div>
+              <div className="text-sm text-foreground font-medium">
+                {agent.connected_at
+                  ? `${formatRelativeTime(agent.connected_at)} · ${formatDateTime(agent.connected_at)}`
+                  : "—"}
+              </div>
+            </div>
+          </div>
+
+          {agent.disconnected_at && (
+            <div className="flex items-center gap-3">
+              <div className="w-7 h-7 rounded-md bg-muted flex items-center justify-center shrink-0">
+                <CircleSlash className="w-3.5 h-3.5 text-muted-foreground" />
+              </div>
+              <div>
+                <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest mb-0.5">Disconnected</div>
+                <div className="text-sm text-foreground font-medium">
+                  {formatRelativeTime(agent.disconnected_at)} · {formatDateTime(agent.disconnected_at)}
+                </div>
+              </div>
+            </div>
+          )}
         </div>
       </div>
     </div>
