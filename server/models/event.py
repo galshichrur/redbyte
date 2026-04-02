@@ -10,7 +10,7 @@ class Event(Base):
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
     agent_id = Column(Integer, ForeignKey("agents.id"), nullable=False)
 
-    type = Column(String)
+    event_type = Column(String)
     name = Column(String)
     severity = Column(Integer)
     description = Column(String)
