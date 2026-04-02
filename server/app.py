@@ -2,13 +2,13 @@ import asyncio
 from fastapi import FastAPI
 from api.auth import router as auth_router
 from api.enrollment import enrollment_router
-from api.ws import router as ws_router
+from ws.agents import router as ws_router
 from database import init_db
 from config import Config
 from network.server import TCPServer
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
-from api.ws_manager import ws_manager
+from ws.ws_manager import ws_manager
 
 
 @asynccontextmanager

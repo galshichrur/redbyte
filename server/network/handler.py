@@ -1,11 +1,13 @@
 import base64
 import os
+import datetime
 from models.agent import Agent
 from typing import Any, Dict
 from database import get_db
 from network.protocol import send_message
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
+from services.event_services import create_event
 
 
 def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
@@ -98,4 +100,6 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
     return agent
 
 def handle_alert(sock, sock_addr: tuple[str, int], agent: Agent, payload: Dict[str, Any]):
-    pass
+
+    detected_at_dt = datetime.(payload.get("timestamp"), "%Y-%m-%d %H:%m:%S")
+    event = create_event()

@@ -1,8 +1,8 @@
 import hashlib
 from datetime import datetime, UTC
 from models.agent import Agent
-from api.ws_manager import ws_manager
-from api.ws import agent_to_dict
+from ws.ws_manager import ws_manager
+from ws.agents import agent_to_dict
 
 
 def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostname: str, os: str,

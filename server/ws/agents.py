@@ -4,7 +4,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 from database import SessionLocal
 from models import Agent
 from services.validate_token import get_current_user_id_ws
-from api.ws_manager import ws_manager
+from ws.ws_manager import ws_manager
 
 
 router = APIRouter()
