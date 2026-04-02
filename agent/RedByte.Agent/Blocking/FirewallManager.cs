@@ -2,9 +2,9 @@ using System.Diagnostics;
 
 namespace RedByte.Agent.Blocking;
 
-public class FirewallManager
+public static class FirewallManager
 {
-    public bool BlockIpAddress(string ipAddress)
+    public static bool BlockIpAddress(string ipAddress)
     {
         try
         {
@@ -25,7 +25,7 @@ public class FirewallManager
         }
     }
 
-    public bool UnblockIpAddress(string ipAddress)
+    public static bool UnblockIpAddress(string ipAddress)
     {
         try
         {
@@ -41,7 +41,7 @@ public class FirewallManager
         }
     }
 
-    private void ExecuteCommand(string arguments)
+    private static void ExecuteCommand(string arguments)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo
         {

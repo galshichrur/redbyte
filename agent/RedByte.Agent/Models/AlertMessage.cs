@@ -8,9 +8,9 @@ public class AlertMessage
     public int severity { get; set; }
     public string description { get; set; }
     public bool is_blocked { get; set; }
-    public string suspected_addresss { get; set; }
+    public string suspected_address { get; set; }
 
-    public AlertMessage(string type, string name, int severity, string description, bool isBlocked, string suspectedAddresss)
+    public AlertMessage(string type, string name, int severity, string description, bool isBlocked, string suspectedAddress)
     {
         timestamp = DateTime.UtcNow.ToString("yyyy-MM-dd HH:mm:ss");
         this.alert_type = type;
@@ -18,6 +18,6 @@ public class AlertMessage
         this.severity = severity;
         this.description = description;
         this.is_blocked = isBlocked;
-        this.suspected_addresss = suspectedAddresss;
+        this.suspected_address = suspectedAddress;
     }
 }
