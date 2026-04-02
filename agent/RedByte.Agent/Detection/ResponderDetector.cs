@@ -1,6 +1,7 @@
 using System;
 using System.Net;
 using PacketDotNet;
+using RedByte.Agent.Blocking;
 using RedByte.Agent.Network;
 
 namespace RedByte.Agent.Detection;
@@ -18,7 +19,7 @@ public class ResponderDetector : IDetection
             string? ip = IsSuspicious(udp);
             if (ip != null)
             {
-                this.NotifyServer(true, ip);
+                this.NotifyServer(FirewallManager.BlockIpAddress(ip), ip);
             }
         }
     }
