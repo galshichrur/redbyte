@@ -84,7 +84,7 @@ export function EnrollmentModal({ open, onOpenChange, token }: EnrollmentModalPr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] p-0 gap-0 overflow-hidden">
+      <DialogContent className="sm:max-w-150 p-0 gap-0 overflow-hidden">
         <DialogHeader className="px-6 pt-6 pb-0">
           <DialogTitle className="text-xl font-semibold tracking-tight">Add a new agent</DialogTitle>
           <DialogDescription className="text-sm">

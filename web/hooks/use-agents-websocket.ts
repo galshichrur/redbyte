@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect, useMemo } from "react"
-import type { Agent, WebSocketEvent } from "@/lib/types"
+import type { Agent, AlertEvent, WebSocketMessage } from "@/lib/types"
 
 const WS_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws")
 
@@ -10,8 +10,9 @@ type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error"
 let activeWs: WebSocket | null = null
 let activeToken: string | null = null
 
-export function useAgentsWebSocket(token: string | null) {
+export function useWebSocket(token: string | null) {
   const [agents, setAgents] = useState<Agent[]>([])
+  const [events, setEvents] = useState<AlertEvent[]>([])
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected")
 
   useEffect(() => {
@@ -36,7 +37,7 @@ export function useAgentsWebSocket(token: string | null) {
 
       setConnectionStatus("connecting")
 
-      const ws = new WebSocket(`${WS_BASE_URL}/ws/agents?token=${token}`)
+      const ws = new WebSocket(`${WS_BASE_URL}/ws?token=${token}`)
       activeWs = ws
       activeToken = token
 
@@ -49,22 +50,27 @@ export function useAgentsWebSocket(token: string | null) {
       ws.onmessage = (event) => {
         if (disposed) return
         try {
-          const data: WebSocketEvent = JSON.parse(event.data)
+          const data: WebSocketMessage = JSON.parse(event.data)
+          console.log("[v0] ws message:", data.type, data)
 
           switch (data.type) {
             case "snapshot":
               setAgents(data.agents)
+              setEvents(data.events)
               break
-            case "agent_created":
+            case "agent.created":
               setAgents((prev) => [...prev, data.agent])
               break
-            case "agent_updated": {
-              const updateId = data.fields.agent_id ?? data.agent_id
+            case "agent.updated": {
+              const updateId = data.agent_id
               setAgents((prev) =>
                 prev.map((a) => (String(a.agent_id) === String(updateId) ? { ...a, ...data.fields } : a))
               )
               break
             }
+            case "event.created":
+              setEvents((prev) => [data.event, ...prev])
+              break
           }
         } catch {
           // ignore malformed messages
@@ -78,7 +84,6 @@ export function useAgentsWebSocket(token: string | null) {
 
       ws.onclose = () => {
         if (disposed) return
-
         activeWs = null
         activeToken = null
         setConnectionStatus("disconnected")
@@ -95,11 +100,7 @@ export function useAgentsWebSocket(token: string | null) {
 
     return () => {
       disposed = true
-
-      if (reconnectTimeout) {
-        clearTimeout(reconnectTimeout)
-      }
-
+      if (reconnectTimeout) clearTimeout(reconnectTimeout)
       if (activeWs) {
         activeWs.close()
         activeWs = null
@@ -111,5 +112,5 @@ export function useAgentsWebSocket(token: string | null) {
   const onlineAgents = useMemo(() => agents.filter((a) => a.status), [agents])
   const offlineAgents = useMemo(() => agents.filter((a) => !a.status), [agents])
 
-  return { agents, onlineAgents, offlineAgents, connectionStatus }
+  return { agents, onlineAgents, offlineAgents, events, connectionStatus }
 }

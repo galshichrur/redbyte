@@ -2,15 +2,16 @@
 
 import { useState } from "react"
 import { useAuth } from "@/lib/auth-context"
-import { useAgentsWebSocket } from "@/hooks/use-agents-websocket"
+import { useWebSocket } from "@/hooks/use-agents-websocket"
 import { AgentCard } from "@/components/dashboard/agent-card"
+import { AlertCard } from "@/components/dashboard/alert-card"
 import { ConnectionStatusBadge } from "@/components/dashboard/connection-status"
 import { EnrollmentModal } from "@/components/dashboard/enrollment-modal"
-import { Monitor, Plus } from "lucide-react"
+import { Monitor, Plus, Bell } from "lucide-react"
 
 export default function DashboardPage() {
   const { user, token } = useAuth()
-  const { agents, onlineAgents, offlineAgents, connectionStatus } = useAgentsWebSocket(token)
+  const { agents, onlineAgents, offlineAgents, events, connectionStatus } = useWebSocket(token)
   const [showEnrollment, setShowEnrollment] = useState(false)
 
   const threatCount = agents.filter((a) => a.under_attack).length
@@ -25,9 +26,7 @@ export default function DashboardPage() {
             <h1 className="text-2xl font-semibold text-foreground tracking-tight">
               Welcome back, {user?.full_name?.split(" ")[0] || "User"}
             </h1>
-            <p className="text-muted-foreground mt-1 text-sm">
-              Monitor and manage your connected agents
-            </p>
+            <p className="text-muted-foreground mt-1 text-sm">Monitor and manage your connected agents</p>
           </div>
           <div className="flex items-center gap-3">
             <ConnectionStatusBadge status={connectionStatus} />
@@ -64,7 +63,7 @@ export default function DashboardPage() {
         </div>
 
         {agents.length > 0 ? (
-          <div>
+          <div className="mb-12">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-base font-semibold text-foreground tracking-tight">Agents</h2>
               <div className="flex items-center gap-3 text-xs text-muted-foreground">
@@ -81,14 +80,37 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <div className="border border-dashed border-border rounded-xl py-20 text-center">
+          <div className="border border-dashed border-border rounded-xl py-20 text-center mb-12">
             <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-4">
               <Monitor className="w-6 h-6 text-muted-foreground" />
             </div>
             <h3 className="text-base font-semibold text-foreground mb-1.5 tracking-tight">No agents connected</h3>
-            <p className="text-muted-foreground text-sm">Click "Add Agent" to connect your first machine</p>
+            <p className="text-muted-foreground text-sm">Click &quot;Add Agent&quot; to connect your first machine</p>
           </div>
         )}
+
+        <div>
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-base font-semibold text-foreground tracking-tight">Alerts</h2>
+            <span className="text-xs text-muted-foreground">{events.length} total</span>
+          </div>
+
+          {events.length > 0 ? (
+            <div className="grid lg:grid-cols-2 gap-5">
+              {events.map((event) => (
+                <AlertCard key={event.id} event={event} />
+              ))}
+            </div>
+          ) : (
+            <div className="border border-dashed border-border rounded-xl py-16 text-center">
+              <div className="w-12 h-12 bg-muted rounded-xl flex items-center justify-center mx-auto mb-4">
+                <Bell className="w-6 h-6 text-muted-foreground" />
+              </div>
+              <h3 className="text-base font-semibold text-foreground mb-1.5 tracking-tight">No alerts</h3>
+              <p className="text-muted-foreground text-sm">Security events will appear here in real-time</p>
+            </div>
+          )}
+        </div>
       </div>
     </>
   )
