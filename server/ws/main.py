@@ -22,6 +22,7 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
         "mac_addr": a.mac_addr,
         "network_type": a.network_type,
         "username": a.username,
+        "first_seen": a.first_seen.isoformat(),
         "connected_at": a.connected_at.isoformat() if a.connected_at else None,
         "disconnected_at": a.disconnected_at.isoformat() if a.disconnected_at else None,
     }

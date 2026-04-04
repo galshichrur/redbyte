@@ -2,7 +2,7 @@ import asyncio
 from fastapi import FastAPI
 from api.auth import router as auth_router
 from api.enrollment import enrollment_router
-from ws.agents import router as ws_router
+from ws.main import router as ws_router
 from database import init_db
 from config import Config
 from network.server import TCPServer
