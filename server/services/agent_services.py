@@ -24,7 +24,7 @@ def create_agent(db, user_id: int, agent_id: bytes, agent_secret: bytes, hostnam
         mac_addr=mac_addr,
         network_type=network_type,
         username=username,
-
+        first_seen=datetime.now(UTC),
         connected_at=datetime.now(UTC),
     )
     db.add(agent)

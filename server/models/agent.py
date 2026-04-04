@@ -27,6 +27,6 @@ class Agent(Base):
     username = Column(String)
 
     # Connectivity
-    first_seen = Column(DateTime, server_default=func.now())
+    first_seen = Column(DateTime)
     connected_at = Column(DateTime)
     disconnected_at = Column(DateTime)
