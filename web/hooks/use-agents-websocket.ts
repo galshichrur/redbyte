@@ -1,35 +1,26 @@
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useRef, useMemo } from "react"
 import type { Agent, AlertEvent, WebSocketMessage } from "@/lib/types"
 
 const WS_BASE_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/^http/, "ws")
 
 type ConnectionStatus = "connecting" | "connected" | "disconnected" | "error"
 
-let activeWs: WebSocket | null = null
-let activeToken: string | null = null
-
 export function useWebSocket(token: string | null) {
   const [agents, setAgents] = useState<Agent[]>([])
   const [events, setEvents] = useState<AlertEvent[]>([])
   const [connectionStatus, setConnectionStatus] = useState<ConnectionStatus>("disconnected")
 
+  // Keep a stable ref to the current ws so the cleanup always closes the right socket
+  const wsRef = useRef<WebSocket | null>(null)
+
   useEffect(() => {
     if (!token) return
 
-    if (activeWs && activeToken === token && (activeWs.readyState === WebSocket.OPEN || activeWs.readyState === WebSocket.CONNECTING)) {
-      return
-    }
-
-    if (activeWs) {
-      activeWs.close()
-      activeWs = null
-      activeToken = null
-    }
-
     let reconnectTimeout: NodeJS.Timeout | null = null
     let reconnectAttempts = 0
+    // Each effect instance gets its own disposed flag; flipped to true in cleanup
     let disposed = false
 
     const connect = () => {
@@ -38,11 +29,10 @@ export function useWebSocket(token: string | null) {
       setConnectionStatus("connecting")
 
       const ws = new WebSocket(`${WS_BASE_URL}/ws?token=${token}`)
-      activeWs = ws
-      activeToken = token
+      wsRef.current = ws
 
       ws.onopen = () => {
-        if (disposed) return
+        if (disposed) { ws.close(); return }
         setConnectionStatus("connected")
         reconnectAttempts = 0
       }
@@ -51,7 +41,6 @@ export function useWebSocket(token: string | null) {
         if (disposed) return
         try {
           const data: WebSocketMessage = JSON.parse(event.data)
-          console.log("[v0] ws message:", data.type, data)
 
           switch (data.type) {
             case "snapshot":
@@ -83,9 +72,10 @@ export function useWebSocket(token: string | null) {
       }
 
       ws.onclose = () => {
+        // If this close was triggered by our own cleanup, do nothing
         if (disposed) return
-        activeWs = null
-        activeToken = null
+
+        wsRef.current = null
         setConnectionStatus("disconnected")
 
         if (reconnectAttempts < 10) {
@@ -99,12 +89,15 @@ export function useWebSocket(token: string | null) {
     connect()
 
     return () => {
+      // Mark this effect instance as dead so none of its callbacks touch state
       disposed = true
       if (reconnectTimeout) clearTimeout(reconnectTimeout)
-      if (activeWs) {
-        activeWs.close()
-        activeWs = null
-        activeToken = null
+      // Close and release the socket that belongs to this effect run
+      const ws = wsRef.current
+      if (ws) {
+        ws.onclose = null // prevent onclose from scheduling another reconnect
+        ws.close()
+        wsRef.current = null
       }
     }
   }, [token])
