@@ -21,19 +21,32 @@ public partial class App : Application
         }
         
         base.OnStartup(e);
-        
-        bool isValid = await Enrollment.Enrollment.ValidateCredentials();
-        if (isValid)
+
+        try
         {
-            var statusWindow = new StatusWindow();
-            Current.MainWindow = statusWindow;
-            statusWindow.Show();
+            bool isValid = await Enrollment.Enrollment.ValidateCredentials();
+            if (isValid)
+            {
+                var statusWindow = new StatusWindow();
+                Current.MainWindow = statusWindow;
+                statusWindow.Show();
+            }
+            else
+            {
+                var enrollWindow = new EnrollWindow();
+                Current.MainWindow = enrollWindow;
+                enrollWindow.Show();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var enrollWindow = new EnrollWindow();
-            Current.MainWindow = enrollWindow;
-            enrollWindow.Show();
+            System.Windows.MessageBox.Show(
+                $"RedByte Agent could not connect to the management server.\n", 
+                "Connection Error", 
+                System.Windows.MessageBoxButton.OK, 
+                System.Windows.MessageBoxImage.Error
+            );
+            Application.Current.Shutdown();
         }
     }
 }
