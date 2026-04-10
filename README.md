@@ -10,6 +10,33 @@ The system is intended for organizations, businesses, and network owners who wan
 ---
 
 ## Structure
-- `server/` – backend API and database logic
-- `endpoint/` – Windows endpoint software
-- `web/` – frontend
+- `server/` – backend API and TCP server written in Python
+- `agent/` – Windows endpoint software written in C#
+- `web/` – frontend website
+
+## Windows Installation
+### Web Server
+Install Node.js
+https://nodejs.org/en/download
+```
+cd web
+move .global.env .env
+```
+Edit the env file
+```
+npm install
+npm run start
+```
+The website will be started at port 3000 by default.
+
+### API and TCP Server
+Install python https://www.python.org/downloads/
+```
+cd ../server
+move .global.env .env
+```
+Edit the env file
+```
+python main.py
+```
+The TCP server will start by default on port 9000 and the API on 8000.
