@@ -11,6 +11,7 @@ public class TcpClientManager
     private TcpClient _client;
     private NetworkStream _stream;
     private const int DefaultPort = 9000;
+    private const string GitGistURL = "https://gist.githubusercontent.com/galshichrur/1b160c4a5451f18e2fd0e94b844657a5/raw/gistfile1.txt";
 
     public static TcpClientManager GetInstance()
     {
@@ -87,6 +88,6 @@ public class TcpClientManager
     private string GetServerIp()
     {
         using var http = new HttpClient();
-        return http.GetStringAsync("https://gist.githubusercontent.com/galshichrur/1b160c4a5451f18e2fd0e94b844657a5/raw/f32127a3133935ec6dd6bbb8766cb328f3a619d7/gistfile1.txt").Result.Trim();
+        return http.GetStringAsync(GitGistURL).Result.Trim();
     }
 }
