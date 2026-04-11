@@ -16,6 +16,12 @@ public partial class App : Application
 
         if (!createdNew)
         {
+            System.Windows.MessageBox.Show(
+                "RedByte already running.", 
+                "Error", 
+                System.Windows.MessageBoxButton.OK, 
+                System.Windows.MessageBoxImage.Error
+            );
             Application.Current.Shutdown();
             return;
         }
@@ -41,8 +47,8 @@ public partial class App : Application
         catch (Exception ex)
         {
             System.Windows.MessageBox.Show(
-                $"RedByte Agent could not connect to the management server.\n", 
-                "Connection Error", 
+                $"RedByte Agent could not connect to server.\n", 
+                "Connection Error",
                 System.Windows.MessageBoxButton.OK, 
                 System.Windows.MessageBoxImage.Error
             );
