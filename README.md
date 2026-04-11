@@ -5,6 +5,15 @@
 Manage, monitor, and protect computer networks using a client server architecture.
 It allows users to secure their network through a web interface, view the status of connected computers, receive real-time alerts about network attacks and block them.
 
+RedByte defends against Local Area Network (LAN) Spoofing and Cache Poisoning attacks. For example:
+
+- ARP Cache Poisoning
+- LLMNR & NBT-NS Spoofing
+- DNS Spoofing
+- Rogue DHCP Server
+- Port Scanning
+
+
 ---
 
 ## Structure
