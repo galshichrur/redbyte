@@ -35,6 +35,9 @@ The website will be started at port 3000 by default.
 Install python https://www.python.org/downloads/
 ```
 cd server
+python -m venv .venv
+.venv\Scripts\activate
+pip install -r requirements.txt
 move .global.env .env
 ```
 Edit the env file
