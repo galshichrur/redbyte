@@ -13,10 +13,9 @@ const inter = Inter({
 })
 
 export const metadata: Metadata = {
-  title: "RedByte - Network Protection Made Simple",
+  title: "RedByte - Simple network protection for everyone.",
   description:
-    "Enterprise-grade network security for everyone. Real-time threat detection and instant response.",
-  generator: "v0.app",
+    "Detect and respond to cyber attacks in real-time. Simple setup, powerful protection.",
   icons: {
     icon: "/favicon.ico",
     apple: "/redbyte-icon.png",
@@ -31,11 +30,9 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <Script
-          defer
-          src="https://cloud.umami.is/script.js"
-          data-website-id="94d149aa-dd20-4d29-bfc1-bd1d7e4b2bde"
-        />
+        <script defer src="https://cloud.umami.is/script.js" data-website-id="94d149aa-dd20-4d29-bfc1-bd1d7e4b2bde"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sienna-accessibility@latest/dist/sienna-accessibility.umd.js"
+        defer></script>
       </head>
       <body className={`${inter.variable} font-sans antialiased`}>
         <AuthProvider>{children}</AuthProvider>
