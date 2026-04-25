@@ -8,7 +8,7 @@ namespace RedByte.Agent.Detection;
 
 public class ResponderDetector : IDetection
 {
-    private const ushort LlmnrPort = 5355;
+    private const int LlmnrPort = 5355;
 
     public void AnalyzePacket(Packet packet)
     {
@@ -45,7 +45,7 @@ public class ResponderDetector : IDetection
                 "Poisoning",
                 "LLMNR",
                 2,
-                "LLMNR Spoofing detected and blocked", 
+                "LLMNR Spoofing detected.", 
                 isBlocked, 
                 suspectedIp
             );

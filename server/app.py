@@ -1,13 +1,14 @@
 import asyncio
-from fastapi import FastAPI
+from contextlib import asynccontextmanager
+
 from api.auth import router as auth_router
 from api.enrollment import enrollment_router
-from ws.main import router as ws_router
-from database import init_db
 from config import Config
-from network.server import TCPServer
+from database import init_db
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from contextlib import asynccontextmanager
+from network.server import TCPServer
+from ws.main import router as ws_router
 from ws.ws_manager import ws_manager
 
 
@@ -19,6 +20,7 @@ async def lifespan(app: FastAPI):
     server.start_server()
     yield
     server.stop_server()
+
 
 app = FastAPI(
     title="RedByte Server",
@@ -37,15 +39,12 @@ app.include_router(auth_router)
 app.include_router(enrollment_router)
 app.include_router(ws_router)
 
+
 @app.get("/")
 def root():
     return {"status": "redbyte server running"}
 
+
 @app.get("/server")
 def server_address():
-    return {
-        "tcp": {
-            "ip": Config.TCP_SERVER_HOST,
-            "port": Config.TCP_SERVER_PORT
-        }
-    }
+    return {"tcp": {"ip": Config.TCP_SERVER_HOST, "port": Config.TCP_SERVER_PORT}}
