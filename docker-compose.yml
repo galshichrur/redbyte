@@ -3,6 +3,31 @@ services:
     build: ./server
     container_name: redbyte-server
     ports:
-      - "8000:8000" # API
-      - "9000:9000" # TCP
+      - "9000:9000"
     restart: unless-stopped
+
+  web:
+    build: ./web
+    container_name: redbyte-web
+    environment:
+      - NEXT_PUBLIC_API_URL=https://redbyteapi.duckdns.org
+    depends_on:
+      - server
+    restart: unless-stopped
+
+  caddy:
+    image: caddy:alpine
+    container_name: redbyte-caddy
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on:
+      - web
+      - server
+
+volumes:
+  caddy_data:

@@ -1,0 +1,7 @@
+redbyteweb.duckdns.org {
+    reverse_proxy web:3000
+}
+
+redbyteapi.duckdns.org {
+    reverse_proxy server:8000
+}
