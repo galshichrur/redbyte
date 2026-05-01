@@ -1,8 +1,8 @@
 using RedByte.Agent.Network;
+using RedByte.Agent.Models;
+using Microsoft.Win32;
 
 namespace RedByte.Agent.Enrollment;
-using System;
-using Microsoft.Win32;
 
 public static class Enrollment
 {
@@ -68,7 +68,7 @@ public static class Enrollment
     private static (string, string)? GetCredentials()
     {
         // Open the HKCU key in read only mode
-        using (RegistryKey key = Registry.CurrentUser.OpenSubKey(RegistryPath))
+        using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryPath))
         {
             if (key == null)
             {

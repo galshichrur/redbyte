@@ -1,5 +1,6 @@
-using RedByte.Agent.Enrollment;
-namespace RedByte.Agent.Network;
+using RedByte.Agent.SystemUtils;
+
+namespace RedByte.Agent.Models;
 
 public class AuthSendMessage
 {

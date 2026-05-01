@@ -1,6 +1,6 @@
-using RedByte.Agent.Enrollment;
+using RedByte.Agent.SystemUtils;
 
-namespace RedByte.Agent.Network;
+namespace RedByte.Agent.Models;
 
 public class EnrollSendMessage
 {

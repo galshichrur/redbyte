@@ -1,4 +1,4 @@
-namespace RedByte.Agent.Network;
+namespace RedByte.Agent.Models;
 
 public class AlertMessage
 {
