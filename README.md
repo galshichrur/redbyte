@@ -45,9 +45,18 @@ Install python https://www.python.org/downloads/
 ```
 cd server
 python -m venv .venv
+```
+In Windows run:
+```
 .venv\Scripts\activate
 pip install -r requirements.txt
 move .global.env .env
+```
+In Linux run:
+```
+source .venv/bin/activate
+pip install -r requirements.txt
+mv .global.env .env
 ```
 Edit the env file
 ```
