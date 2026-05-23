@@ -1,15 +1,34 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
-import Script from "next/script";
+import localFont from "next/font/local";
 import { Analytics } from "@vercel/analytics/next";
 import { AuthProvider } from "@/lib/auth-context";
 import "./globals.css";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
-  display: "swap",
+const bodyFont = localFont({
+  src: "../public/fonts/body.woff2",
+  variable: "--font-body",
+});
+
+const degularDisplay = localFont({
+  src: [
+    {
+      path: "../public/fonts/DegularDisplay-Regular.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/DegularDisplay-Medium.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../public/fonts/DegularDisplay-Semibold.woff2",
+      weight: "600",
+      style: "normal",
+    },
+  ],
+  variable: "--font-degular",
 });
 
 export const metadata: Metadata = {
@@ -28,7 +47,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html
+      lang="en"
+      className={`${bodyFont.variable} ${degularDisplay.variable}`}
+    >
       <head>
         <script
           defer
@@ -36,7 +58,7 @@ export default function RootLayout({
           data-website-id="94d149aa-dd20-4d29-bfc1-bd1d7e4b2bde"
         ></script>
       </head>
-      <body className={`${inter.variable} font-sans antialiased`}>
+      <body className="antialiased font-sans">
         <AuthProvider>{children}</AuthProvider>
         <Analytics />
       </body>

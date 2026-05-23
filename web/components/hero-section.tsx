@@ -1,6 +1,6 @@
-import { Button } from "@/components/ui/button"
-import { ArrowRight } from "lucide-react"
-import Link from "next/link"
+import { Button } from "@/components/ui/button";
+import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export function HeroSection() {
   return (
@@ -11,39 +11,47 @@ export function HeroSection() {
         <div className="absolute bottom-0 right-1/4 w-80 h-80 bg-primary/8 rounded-full blur-3xl" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/3 rounded-full blur-3xl" />
       </div>
-      
+
       {/* Grid pattern overlay */}
-      <div 
+      <div
         className="absolute inset-0 -z-10 opacity-[0.015]"
         style={{
           backgroundImage: `linear-gradient(var(--foreground) 1px, transparent 1px), linear-gradient(90deg, var(--foreground) 1px, transparent 1px)`,
-          backgroundSize: '60px 60px'
+          backgroundSize: "60px 60px",
         }}
       />
 
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-24">
-          <h1 className="opacity-0 animate-fade-up text-4xl md:text-6xl lg:text-7xl font-semibold text-foreground leading-[1.08] tracking-[-0.02em] mb-8 text-balance">
+          <h1 className="opacity-0 animate-fade-up text-4xl md:text-6xl lg:text-8xl font-semibold text-foreground leading-[1.08] tracking-[-0.02em] mb-8 text-balance">
             Protect your network
             <br />
-            <span className="text-primary">without the complexity</span>
+            <span className="text-primary">without the complexity.</span>
           </h1>
 
-          <p className="opacity-0 animate-fade-up animation-delay-100 text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-[1.6] font-light text-pretty">
-            Detect and respond to cyber attacks in real-time. Simple setup, powerful protection.
+          <p className="opacity-0 animate-fade-up animation-delay-100 text-lg md:text-2xl text-muted-foreground max-w-2xl mx-auto mb-12 leading-[1.6] font-light text-pretty">
+            Detect and respond to cyber attacks in real-time. Simple setup,
+            powerful protection.
           </p>
 
           <div className="opacity-0 animate-fade-up animation-delay-200 flex items-center justify-center gap-4">
-            <Button size="lg" className="text-base px-8 py-6 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow" asChild>
+            <Button
+              size="lg"
+              className="text-base px-8 py-6 rounded-full shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 transition-shadow"
+              asChild
+            >
               <Link href="/register">
                 Get Started
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-base px-8 py-6 rounded-full bg-transparent" asChild>
-              <Link href="#features">
-                Learn More
-              </Link>
+            <Button
+              size="lg"
+              variant="outline"
+              className="text-base px-8 py-6 rounded-full bg-transparent"
+              asChild
+            >
+              <Link href="#features">Learn More</Link>
             </Button>
           </div>
         </div>
@@ -56,8 +64,7 @@ export function HeroSection() {
               <div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
               <div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
             </div>
-            <div className="aspect-[16/9] bg-gradient-to-br from-secondary via-background to-secondary/50 flex items-center justify-center">
-            </div>
+            <div className="aspect-[16/9] bg-gradient-to-br from-secondary via-background to-secondary/50 flex items-center justify-center"></div>
           </div>
           {/* Decorative glow */}
           <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl -z-10" />
@@ -66,23 +73,39 @@ export function HeroSection() {
         {/* Stats */}
         <div className="opacity-0 animate-fade-up animation-delay-400 mt-28 grid grid-cols-2 md:grid-cols-4 gap-12 max-w-4xl mx-auto">
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">Real-time</div>
-            <div className="text-sm text-muted-foreground mt-2 font-light">Threat detection</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              Real-time
+            </div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">
+              Threat detection
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">{"<"}1s</div>
-            <div className="text-sm text-muted-foreground mt-2 font-light">Alert time</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              {"<"}1s
+            </div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">
+              Alert time
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">24/7</div>
-            <div className="text-sm text-muted-foreground mt-2 font-light">Monitoring</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              24/7
+            </div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">
+              Monitoring
+            </div>
           </div>
           <div className="text-center">
-            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">5min</div>
-            <div className="text-sm text-muted-foreground mt-2 font-light">Setup time</div>
+            <div className="text-2xl md:text-3xl font-semibold text-foreground tracking-tight">
+              5min
+            </div>
+            <div className="text-sm text-muted-foreground mt-2 font-light">
+              Setup time
+            </div>
           </div>
         </div>
       </div>
     </section>
-  )
+  );
 }

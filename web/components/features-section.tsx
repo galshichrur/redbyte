@@ -1,44 +1,52 @@
-import { Shield, Zap, Eye, Bell, Lock, MonitorSmartphone } from "lucide-react"
+import { Shield, Zap, Eye, Bell, Lock, MonitorSmartphone } from "lucide-react";
 
 const features = [
   {
     icon: Eye,
     title: "Real-time monitoring",
-    description: "Watch your entire network from one place. See what's happening on every computer.",
+    description:
+      "Watch your entire network from one place. See what's happening on every computer in your organization.",
   },
   {
     icon: Zap,
     title: "Instant detection",
-    description: "Spot attacks the moment they happen. Port scans, DDoS attacks, and more.",
+    description:
+      "Spot attacks the moment they happen. Port scans, ARP Cache Poisoning, LLMNR & NBT-NS Spoofing, DNS Spoofing, Rogue DHCP Server, and more.",
   },
   {
     icon: Bell,
     title: "Smart alerts",
-    description: "Get notified when something suspicious happens. No noise, just what matters.",
+    description:
+      "Get notified when something suspicious happens. No noise, just what matters.",
   },
   {
     icon: Shield,
     title: "Automatic response",
-    description: "Don't just detect threats—stop them before they cause damage.",
+    description:
+      "Don't just detect threats stop them before they cause damage.",
   },
   {
     icon: Lock,
     title: "Encrypted everything",
-    description: "AES-256 encryption protects all communication between your computers.",
+    description:
+      "Encryption protects all communication between your computers. Using AES-256 encryption and ECDH key exchange.",
   },
   {
     icon: MonitorSmartphone,
     title: "Easy dashboard",
-    description: "No technical knowledge needed. A clean interface shows exactly what you need.",
+    description:
+      "No technical knowledge needed. A clean interface shows exactly what you need.",
   },
-]
+];
 
 export function FeaturesSection() {
   return (
     <section id="features" className="py-40 px-6 bg-secondary/30">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-24 opacity-0 animate-fade-up">
-          <h2 className="text-3xl md:text-5xl font-semibold text-foreground mb-5 text-balance tracking-tight">Everything you need to stay safe</h2>
+          <h2 className="text-3xl md:text-5xl font-semibold text-foreground mb-5 text-balance tracking-tight">
+            Everything you need to stay safe
+          </h2>
           <p className="text-muted-foreground text-lg max-w-xl mx-auto font-light">
             Powerful protection made simple.
           </p>
@@ -54,12 +62,16 @@ export function FeaturesSection() {
               <div className="w-11 h-11 bg-primary/10 rounded-xl flex items-center justify-center mb-5 group-hover:bg-primary/15 transition-colors">
                 <feature.icon className="w-5 h-5 text-primary" />
               </div>
-              <h3 className="text-base font-semibold text-foreground mb-2.5 tracking-tight">{feature.title}</h3>
-              <p className="text-muted-foreground text-sm leading-relaxed font-light">{feature.description}</p>
+              <p className="text-lg font-semibold text-foreground mb-2.5 tracking-tight">
+                {feature.title}
+              </p>
+              <p className="text-muted-foreground text-sm leading-relaxed font-light">
+                {feature.description}
+              </p>
             </div>
           ))}
         </div>
       </div>
     </section>
-  )
+  );
 }
