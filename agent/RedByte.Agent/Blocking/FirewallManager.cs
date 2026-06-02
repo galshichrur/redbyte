@@ -4,6 +4,21 @@ namespace RedByte.Agent.Blocking;
 
 public static class FirewallManager
 {
+    public static bool BlockIncomingIpAddress(string ipAddress)
+    {
+        try
+        {
+            string ruleName = $"RedByte_Block_In_{ipAddress}";
+            string args = $"advfirewall firewall add rule name=\"{ruleName}\" dir=in action=block remoteip={ipAddress}";
+            ExecuteCommand(args);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
+
     public static bool BlockIpAddress(string ipAddress)
     {
         try
@@ -19,7 +34,7 @@ public static class FirewallManager
             ExecuteCommand(argsOut);
             return true;
         }
-        catch (Exception ex)
+        catch
         {
             return false;
         }
@@ -35,7 +50,7 @@ public static class FirewallManager
             ExecuteCommand(args);
             return true;
         }
-        catch (Exception ex)
+        catch
         {
             return false;
         }
@@ -51,9 +66,8 @@ public static class FirewallManager
             UseShellExecute = false
         };
 
-        using (Process process = Process.Start(startInfo))
-        {
-            process?.WaitForExit();
-        }
+        Process? process = Process.Start(startInfo);
+        process?.WaitForExit();
+        process?.Dispose();
     }
 }

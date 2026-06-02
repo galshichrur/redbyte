@@ -10,6 +10,7 @@ public class DetectionReport
     public string Description { get; }
     public string SuspectedAddress { get; }
     public bool ShouldBlock { get; }
+    public bool BlockIncomingOnly { get; }
 
     public DetectionReport(
         string alertType,
@@ -17,7 +18,8 @@ public class DetectionReport
         int severity,
         string description,
         string suspectedAddress,
-        bool shouldBlock)
+        bool shouldBlock,
+        bool blockIncomingOnly = false)
     {
         AlertType = alertType;
         AlertName = alertName;
@@ -25,6 +27,7 @@ public class DetectionReport
         Description = description;
         SuspectedAddress = suspectedAddress;
         ShouldBlock = shouldBlock;
+        BlockIncomingOnly = blockIncomingOnly;
     }
 
     public AlertMessage ToAlertMessage(bool isBlocked)

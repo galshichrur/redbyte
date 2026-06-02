@@ -39,7 +39,14 @@ public class DetectionEngine
 
         if (report.ShouldBlock)
         {
-            isBlocked = FirewallManager.BlockIpAddress(report.SuspectedAddress);
+            if (report.BlockIncomingOnly)
+            {
+                isBlocked = FirewallManager.BlockIncomingIpAddress(report.SuspectedAddress);
+            }
+            else
+            {
+                isBlocked = FirewallManager.BlockIpAddress(report.SuspectedAddress);
+            }
         }
 
         try

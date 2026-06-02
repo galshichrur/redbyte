@@ -4,6 +4,11 @@ public static class DetectionSetup
 {
     public static List<IDetector> CreateDetectors()
     {
-        return new List<IDetector>();
+        return new List<IDetector>
+        {
+            new ArpPoisoningDetector(),
+            new PortScanDetector(),
+            new LlmnrSpoofingDetector()
+        };
     }
 }
