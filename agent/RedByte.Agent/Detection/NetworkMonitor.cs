@@ -5,11 +5,11 @@ namespace RedByte.Agent.Detection;
 
 public class NetworkMonitor
 {
-    private List<IDetection> detectors;
+    private DetectionEngine engine;
 
-    public NetworkMonitor(List<IDetection> detectors)
+    public NetworkMonitor(DetectionEngine engine)
     {
-        this.detectors = detectors;
+        this.engine = engine;
     }
 
     public void Start()
@@ -21,10 +21,7 @@ public class NetworkMonitor
             RawCapture raw = e.GetPacket();
             Packet packet = Packet.ParsePacket(raw.LinkLayerType, raw.Data);
 
-            foreach (IDetection detector in detectors)
-            {
-                detector.AnalyzePacket(packet);
-            }
+            _ = engine.Analyze(packet);
         };
 
         device.Open(DeviceModes.Promiscuous);

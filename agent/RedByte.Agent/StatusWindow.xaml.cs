@@ -9,10 +9,8 @@ namespace RedByte.Agent
         public StatusWindow()
         {
             InitializeComponent();
-            ResponderDetector responder = new ResponderDetector();
-            List<IDetection> detectors = new List<IDetection>();
-            detectors.Add(responder);
-            NetworkMonitor net = new NetworkMonitor(detectors);
+            DetectionEngine engine = new DetectionEngine(DetectionSetup.CreateDetectors());
+            NetworkMonitor net = new NetworkMonitor(engine);
             net.Start();
         }
 
