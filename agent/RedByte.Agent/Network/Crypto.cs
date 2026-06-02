@@ -5,15 +5,16 @@ using NSec.Cryptography;
 
 namespace RedByte.Agent.Network;
 
-public static class Crypto
+public sealed class CryptoSession
 {
     public const int PublicKeySize = 32;
-    private const int NonceSize = 12;
-    private const int TagSize = 16;
+    public const int NonceSize = 12;
+    public const int TagSize = 16;
+    public const int MinEncryptedBodySize = NonceSize + TagSize;
 
-    private static byte[]? _sharedKey;
+    private byte[]? _sharedKey;
 
-    public static byte[] CreatePublicKey(out Key privateKey)
+    public byte[] CreatePublicKey(out Key privateKey)
     {
         privateKey = Key.Create(KeyAgreementAlgorithm.X25519, new KeyCreationParameters
         {
@@ -23,68 +24,73 @@ public static class Crypto
         return privateKey.PublicKey.Export(KeyBlobFormat.RawPublicKey);
     }
 
-    public static void SetSharedKey(Key privateKey, byte[] serverPublicKey)
+    public void SetSharedKey(Key privateKey, byte[] serverPublicKey)
     {
         if (serverPublicKey.Length != PublicKeySize)
-            throw new Exception("Invalid server public key.");
+            throw new Exception("Invalid server public key length.");
 
-        PublicKey serverKey = PublicKey.Import(KeyAgreementAlgorithm.X25519, serverPublicKey, KeyBlobFormat.RawPublicKey);
+        PublicKey serverKey = PublicKey.Import(
+            KeyAgreementAlgorithm.X25519,
+            serverPublicKey,
+            KeyBlobFormat.RawPublicKey
+        );
+
         SharedSecret? sharedSecret = KeyAgreementAlgorithm.X25519.Agree(privateKey, serverKey);
-        if (sharedSecret == null)
-            throw new Exception("Could not create shared key.");
+        if (sharedSecret is null)
+            throw new CryptographicException("Could not create shared secret.");
 
         HkdfSha256 hkdf = new HkdfSha256();
-        _sharedKey = hkdf.DeriveBytes(sharedSecret, null, null, 32);
+        _sharedKey = hkdf.DeriveBytes(sharedSecret, salt: null, info: null, count: 32);
     }
 
-    public static byte[] Encrypt(object data)
+    public byte[] Encrypt(object payload)
     {
         byte[] key = GetSharedKey();
         byte[] nonce = RandomNumberGenerator.GetBytes(NonceSize);
-        byte[] plainBytes = Encoding.UTF8.GetBytes(JsonSerializer.Serialize(data));
-        byte[] cipherBytes = new byte[plainBytes.Length];
+        byte[] plaintext = JsonSerializer.SerializeToUtf8Bytes(payload);
+        byte[] ciphertext = new byte[plaintext.Length];
         byte[] tag = new byte[TagSize];
 
         using var aes = new AesGcm(key, TagSize);
-        aes.Encrypt(nonce, plainBytes, cipherBytes, tag);
+        aes.Encrypt(nonce, plaintext, ciphertext, tag);
+        
+        // nonce(12) | ciphertext | tag(16)
+        byte[] body = new byte[NonceSize + ciphertext.Length + TagSize];
+        Buffer.BlockCopy(nonce, 0, body, 0, NonceSize);
+        Buffer.BlockCopy(ciphertext, 0, body, NonceSize, ciphertext.Length);
+        Buffer.BlockCopy(tag, 0, body, NonceSize + ciphertext.Length, TagSize);
 
-        // Frame body: nonce(12) | ciphertext | tag(16)
-        byte[] result = new byte[nonce.Length + cipherBytes.Length + tag.Length];
-        nonce.CopyTo(result, 0);
-        cipherBytes.CopyTo(result, nonce.Length);
-        tag.CopyTo(result, nonce.Length + cipherBytes.Length);
-
-        return result;
+        return body;
     }
 
-    public static T? Decrypt<T>(byte[] frame)
+    public T? Decrypt<T>(byte[] body)
     {
-        if (frame.Length < NonceSize + TagSize)
-            throw new Exception("Invalid encrypted frame.");
+        if (body.Length < MinEncryptedBodySize)
+            throw new Exception("Invalid encrypted frame body length.");
 
         byte[] key = GetSharedKey();
-        byte[] nonce = frame[..NonceSize];
-        byte[] cipherBytes = frame[NonceSize..^TagSize];
-        byte[] tag = frame[^TagSize..];
-        byte[] plainBytes = new byte[cipherBytes.Length];
+        byte[] nonce = body[..NonceSize];
+        byte[] ciphertext = body[NonceSize..^TagSize];
+        byte[] tag = body[^TagSize..];
+        byte[] plaintext = new byte[ciphertext.Length];
 
         using var aes = new AesGcm(key, TagSize);
-        aes.Decrypt(nonce, cipherBytes, tag, plainBytes);
+        aes.Decrypt(nonce, ciphertext, tag, plaintext);
 
-        string json = Encoding.UTF8.GetString(plainBytes);
-        return JsonSerializer.Deserialize<T>(json);
+        return JsonSerializer.Deserialize<T>(Encoding.UTF8.GetString(plaintext));
     }
 
-    public static void Clear()
+    public void Clear()
     {
-        _sharedKey = null;
+        if (_sharedKey is not null)
+        {
+            CryptographicOperations.ZeroMemory(_sharedKey);
+            _sharedKey = null;
+        }
     }
 
-    private static byte[] GetSharedKey()
+    private byte[] GetSharedKey()
     {
-        if (_sharedKey == null)
-            throw new Exception("Secure session was not started.");
-
-        return _sharedKey;
+        return _sharedKey ?? throw new Exception("Secure session was not started.");
     }
 }

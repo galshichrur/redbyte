@@ -1,54 +1,42 @@
-import struct
 import socket
-import json
-from typing import Dict, Any
+import struct
 
 LENGTH_SIZE = 4
-MAX_FRAME_LEN = 2 * 1024 * 1024 # 2 MB
+MAX_FRAME_LEN = 2 * 1024 * 1024  # 2 MB
+
 
 def recv_exact(sock: socket.socket, size: int) -> bytes:
-    """Receive exactly the given size bytes from the given socket."""
-    data = b''
-    if size <= 0:
-        return b''
+    """Receive exactly size bytes from a TCP socket."""
+    if size < 0:
+        raise ValueError("size cannot be negative")
+
+    data = bytearray()
     while len(data) < size:
         chunk = sock.recv(size - len(data))
         if not chunk:
             raise ConnectionError("Socket closed")
-        data += chunk
-    return data
+        data.extend(chunk)
 
-def recv_message(sock: socket.socket) -> Dict[str, Any]:
-    """
-    Receive a message and return the message as dict.
-    """
+    return bytes(data)
+
+
+def recv_frame(sock: socket.socket) -> bytes:
+    """Receive one length-prefixed binary frame: length(4 LE) | body."""
     length_bytes = recv_exact(sock, LENGTH_SIZE)
     length = struct.unpack("<I", length_bytes)[0]
 
     if length < 1 or length > MAX_FRAME_LEN:
-        raise ValueError("Invalid frame length")
+        raise ValueError(f"Invalid frame length: {length}")
 
-    payload_bytes = recv_exact(sock, length)
+    return recv_exact(sock, length)
 
-    try:
-        payload = json.loads(payload_bytes.decode())
-    except json.JSONDecodeError:
-        raise ValueError("Invalid JSON payload")
 
-    print(f"Received: {payload}\n")
-    return payload
+def send_frame(sock: socket.socket, body: bytes) -> None:
+    """Send one length-prefixed binary frame: length(4 LE) | body."""
+    if not body:
+        raise ValueError("Frame body cannot be empty")
 
-def send_message(sock: socket.socket, payload: Dict[str, Any] | None = None):
-    """
-    Send a given dict payload as JSON.
-    """
+    if len(body) > MAX_FRAME_LEN:
+        raise ValueError("Frame body too large")
 
-    payload_bytes = json.dumps(payload, separators=(",", ":")).encode("utf-8")
-    length = len(payload_bytes)
-
-    if length > MAX_FRAME_LEN:
-        raise ValueError("Payload too large")
-
-    frame = struct.pack("<I", length) + payload_bytes
-    print(f"Sent: {payload}\n")
-    sock.sendall(frame)
+    sock.sendall(struct.pack("<I", len(body)) + body)
