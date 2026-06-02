@@ -1,7 +1,6 @@
 using System.Net.Sockets;
-using System.Text;
-using System.Text.Json;
 using System.Net.Http;
+using NSec.Cryptography;
 
 namespace RedByte.Agent.Network;
 
@@ -27,19 +26,20 @@ public class TcpClientManager
             _client = new TcpClient();
             await _client.ConnectAsync(GetServerIp(), DefaultPort);
             _stream = _client.GetStream();
+
+            await StartSecureSession();
             return true;
         }
         catch
         {
+            Disconnect();
             return false;
         }
     }
 
     public async Task Send(object data)
     {
-        string json = JsonSerializer.Serialize(data);
-        byte[] payload = Encoding.UTF8.GetBytes(json);
-
+        byte[] payload = Crypto.Encrypt(data);
         byte[] length = BitConverter.GetBytes(payload.Length);
 
         await _stream.WriteAsync(length);
@@ -54,9 +54,7 @@ public class TcpClientManager
             int length = BitConverter.ToInt32(lengthBytes);
 
             byte[] payload = await ReadExact(length);
-            string json = Encoding.UTF8.GetString(payload);
-
-            return JsonSerializer.Deserialize<T>(json);
+            return Crypto.Decrypt<T>(payload);
         }
         catch
         {
@@ -81,8 +79,20 @@ public class TcpClientManager
 
     public void Disconnect()
     {
+        Crypto.Clear();
         _stream?.Close();
         _client?.Close();
+    }
+
+    private async Task StartSecureSession()
+    {
+        byte[] publicKey = Crypto.CreatePublicKey(out Key privateKey);
+
+        // Handshake: public_key(32 bytes)
+        await _stream.WriteAsync(publicKey);
+        byte[] serverPublicKey = await ReadExact(Crypto.PublicKeySize);
+
+        Crypto.SetSharedKey(privateKey, serverPublicKey);
     }
 
     private string GetServerIp()
