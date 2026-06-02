@@ -1,7 +1,11 @@
 import socket
 import threading
 from network.handler import handle_enroll, handle_auth, handle_alert
-from network.protocol import recv_message
+from network.crypto import (
+    close_secure_session,
+    recv_secure,
+    start_secure_session,
+)
 from services.agent_services import update_agent_status
 from config import Config
 from database import get_db
@@ -68,8 +72,10 @@ class TCPServer:
         agent = None
 
         try:
+            start_secure_session(client_sock)
+
             # Handshake phase, only ENROLL or AUTH messages allowed.
-            payload = recv_message(client_sock)
+            payload = recv_secure(client_sock)
             msg_type = payload.get("type")
 
             if msg_type == "ENROLL":
@@ -91,10 +97,13 @@ class TCPServer:
             # Enrolled connection phase
             while self.is_running:
                 try:
-                    payload = recv_message(client_sock)
+                    payload = recv_secure(client_sock)
                     msg_type = payload.get("type")
                 except ConnectionResetError:
                     break  # Client disconnected forcefully
+                except Exception as e:
+                    print(f"Secure connection failed for agent {agent.id}: {e}")
+                    break
 
                 if not msg_type:
                         break  # Client close connection (empty message)
@@ -112,6 +121,8 @@ class TCPServer:
             print(e)
 
         finally:
+            close_secure_session(client_sock)
+
             if agent:
                 update_agent_status(next(get_db()), agent.id, False)
 

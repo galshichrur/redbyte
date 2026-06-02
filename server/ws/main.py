@@ -1,11 +1,11 @@
 import base64
 from typing import Any
+
+from database import SessionLocal
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from models import Agent, Event
 from services.validate_token import get_current_user_id_ws
 from ws.ws_manager import ws_manager
-from database import SessionLocal
-from models import Agent, Event
-
 
 router = APIRouter()
 
@@ -26,6 +26,7 @@ def agent_to_dict(a: Agent) -> dict[str, Any]:
         "connected_at": a.connected_at.isoformat() if a.connected_at else None,
         "disconnected_at": a.disconnected_at.isoformat() if a.disconnected_at else None,
     }
+
 
 def event_to_dict(e: Event) -> dict[str, Any]:
     return {
@@ -52,6 +53,7 @@ def get_snapshot(user_id: int):
             "events": [event_to_dict(e) for e in events],
         }
 
+
 @router.websocket("/ws")
 async def ws_main(ws: WebSocket):
     user_id = get_current_user_id_ws(ws)
@@ -66,10 +68,7 @@ async def ws_main(ws: WebSocket):
         # Send initial snapshot of all user's agents
         snapshot = get_snapshot(user_id)
 
-        await ws.send_json({
-            "type": "snapshot",
-            **snapshot
-        })
+        await ws.send_json({"type": "snapshot", **snapshot})
 
         # Keep the connection alive
         while True:
