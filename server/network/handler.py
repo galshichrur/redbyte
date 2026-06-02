@@ -4,7 +4,7 @@ import datetime
 from models.agent import Agent
 from typing import Any, Dict
 from database import get_db
-from network.crypto import send_secure
+from network.crypto import Crypto
 from services.enrollment_services import verify_enrollment_code
 from services.agent_services import create_agent, validate_agent
 from services.event_services import create_event
@@ -23,7 +23,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
             "type": "ENROLL",
             "status": False
         }
-        send_secure(sock, fail_enroll_response)
+        Crypto.send_secure(sock, fail_enroll_response)
         return None
 
     # Generate agent credentials
@@ -56,7 +56,7 @@ def handle_enroll(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
         "agent_id": agent_id_b64,
         "agent_secret": agent_secret_b64,
     }
-    send_secure(sock, success_enroll_response)
+    Crypto.send_secure(sock, success_enroll_response)
     print("User successfully enrolled.")
     return agent
 
@@ -89,13 +89,13 @@ def handle_auth(sock, sock_addr: tuple[str, int], payload: Dict[str, Any]):
             "type": "AUTH",
             "status": False,
         }
-        send_secure(sock, fail_auth_response)
+        Crypto.send_secure(sock, fail_auth_response)
     else:
         success_auth_response = {
             "type": "AUTH",
             "status": True,
         }
-        send_secure(sock, success_auth_response)
+        Crypto.send_secure(sock, success_auth_response)
 
     return agent
 
