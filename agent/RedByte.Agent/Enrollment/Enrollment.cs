@@ -67,7 +67,7 @@ public static class Enrollment
     // Checks if the registry contains the agentId and agentSecret, if true returns them, else returns null
     private static (string, string)? GetCredentials()
     {
-        // Open the HKCU key in read only mode
+        // Open the HKCU key in read only mode. Enrollment stores credentials here.
         using (RegistryKey key = Registry.LocalMachine.OpenSubKey(RegistryPath))
         {
             if (key == null)
@@ -92,7 +92,7 @@ public static class Enrollment
     {
         try
         {
-            using (RegistryKey key = Registry.CurrentUser.CreateSubKey(RegistryPath))
+            using (RegistryKey key = Registry.LocalMachine.CreateSubKey(RegistryPath))
             {
                 if (key == null) return false;
 
