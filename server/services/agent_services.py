@@ -55,8 +55,8 @@ def validate_agent(db, agent_id: bytes, agent_secret: bytes, hostname: str, os: 
     agent.public_ip_addr = public_ip_addr
     agent.port = port
     agent.mac_addr = mac_addr
-    agent.network_type = network_type,
-    agent.username = username,
+    agent.network_type = network_type
+    agent.username = username
     agent.connected_at = datetime.now(UTC)
 
     db.commit()
