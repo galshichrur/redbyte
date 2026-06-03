@@ -47,7 +47,7 @@ public class LlmnrSpoofingDetector : IDetector
 
             return new DetectionReport(
                 "Poisoning",
-                "LLMNR",
+                "LLMNR Poisoning",
                 2,
                 $"LLMNR activity detected from {sourceIp}. This protocol can be abused for spoofing in the local network.",
                 sourceIp,

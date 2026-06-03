@@ -1,5 +1,7 @@
+using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.RegularExpressions;
 using PacketDotNet;
 using RedByte.Agent.Blocking;
 
@@ -7,9 +9,18 @@ namespace RedByte.Agent.Detection;
 
 public class ArpPoisoningDetector : IDetector
 {
+    private static readonly Regex ArpEntryPattern = new Regex(
+        @"^\s*(?<ip>(?:\d{1,3}\.){3}\d{1,3})\s+(?<mac>(?:[0-9a-fA-F]{2}[:-]){5}[0-9a-fA-F]{2})\s+",
+        RegexOptions.Compiled);
+
     private readonly object _lock = new object();
     private readonly Dictionary<string, PhysicalAddress> _trustedMappings = new Dictionary<string, PhysicalAddress>();
     private readonly HashSet<string> _reportedAttacks = new HashSet<string>();
+
+    public ArpPoisoningDetector()
+    {
+        LoadCurrentArpCache();
+    }
 
     public DetectionReport? Analyze(Packet packet)
     {
@@ -57,10 +68,10 @@ public class ArpPoisoningDetector : IDetector
             string trustedMac = FormatMac(trustedMacAddress);
             return new DetectionReport(
                 "Poisoning",
-                "ARP",
+                "ARP Poisoning",
                 3,
                 $"ARP Spoofing detected. Known IP {ip} changed from {trustedMac} to {mac}.",
-                mac,
+                ip,
                 false
             );
         }
@@ -84,5 +95,50 @@ public class ArpPoisoningDetector : IDetector
     private string FormatMac(PhysicalAddress macAddress)
     {
         return BitConverter.ToString(macAddress.GetAddressBytes());
+    }
+
+    private void LoadCurrentArpCache()
+    {
+        try
+        {
+            ProcessStartInfo startInfo = new ProcessStartInfo
+            {
+                FileName = "arp",
+                Arguments = "-a",
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true
+            };
+
+            using Process? process = Process.Start(startInfo);
+            if (process == null)
+            {
+                return;
+            }
+
+            string output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
+
+            foreach (string line in output.Split(Environment.NewLine))
+            {
+                Match match = ArpEntryPattern.Match(line);
+                if (!match.Success)
+                {
+                    continue;
+                }
+
+                IPAddress ipAddress = IPAddress.Parse(match.Groups["ip"].Value);
+                PhysicalAddress macAddress = PhysicalAddress.Parse(
+                    match.Groups["mac"].Value.Replace("-", "").Replace(":", ""));
+
+                if (!IsEmptyAddress(ipAddress) && !IsEmptyMac(macAddress))
+                {
+                    _trustedMappings[ipAddress.ToString()] = macAddress;
+                }
+            }
+        }
+        catch
+        {
+        }
     }
 }
