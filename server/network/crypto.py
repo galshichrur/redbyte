@@ -10,15 +10,6 @@ from cryptography.hazmat.primitives.kdf.hkdf import HKDF
 from network.protocol import MAX_FRAME_LEN, recv_exact, recv_frame, send_frame
 
 class Crypto:
-    """
-    Handshake, before encryption:
-        client_public_key(32) -> server
-        server_public_key(32) -> client
-
-    Encrypted messages, after handshake:
-        length(4 little-endian) | nonce(12) | ciphertext | tag(16)
-    """
-
     NONCE_SIZE = 12
     TAG_SIZE = 16
     PUBLIC_KEY_SIZE = 32
