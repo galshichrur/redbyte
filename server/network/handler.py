@@ -1,6 +1,7 @@
 import base64
 import binascii
 import os
+from datetime import datetime
 from typing import Any
 from database import get_db
 from models.agent import Agent
@@ -94,5 +95,18 @@ def handle_alert(agent: Agent, payload: dict[str, Any]):
         description=payload.get("description"),
         is_blocked=payload.get("is_blocked"),
         suspected_ip=payload.get("suspected_ip"),
-        detected_at=payload.get("detected_at"),
+        detected_at=parse_detected_at(payload.get("detected_at")),
     )
+
+
+def parse_detected_at(value: Any) -> datetime:
+    if isinstance(value, datetime):
+        return value
+
+    if isinstance(value, str):
+        try:
+            return datetime.fromisoformat(value)
+        except ValueError:
+            pass
+
+    return datetime.utcnow()
