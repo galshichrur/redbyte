@@ -1,41 +1,57 @@
-﻿using System.Configuration;
-using System.Data;
 using System.Windows;
 
 namespace RedByte.Agent;
 
 public partial class App : Application
 {
-    // Prevent from running the application twice or more
-    private static Mutex _mutex = null;
+    // Prevent from running the application twice or more.
+    private static Mutex? _mutex;
+
     protected override async void OnStartup(StartupEventArgs e)
     {
         const string appName = "RedByteAgentMutex";
-        bool createdNew;
-        _mutex = new Mutex(true, appName, out createdNew);
+        _mutex = new Mutex(true, appName, out bool createdNew);
 
         if (!createdNew)
         {
-            Application.Current.Shutdown();
+            Current.Shutdown();
             return;
         }
-        
+
         base.OnStartup(e);
-        
-        SystemUtils.Startup.SetStartup();
-        
-        bool isValid = await Enrollment.Enrollment.ValidateCredentials();
-        if (isValid)
+
+        try
         {
-            var statusWindow = new StatusWindow();
-            Current.MainWindow = statusWindow;
-            statusWindow.Show();
+            SystemUtils.Startup.SetStartup();
+
+            bool isValid = await Enrollment.Enrollment.ValidateCredentials();
+            if (isValid)
+            {
+                var statusWindow = new StatusWindow();
+                Current.MainWindow = statusWindow;
+                statusWindow.Show();
+            }
+            else
+            {
+                var enrollWindow = new EnrollWindow();
+                Current.MainWindow = enrollWindow;
+                enrollWindow.Show();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var enrollWindow = new EnrollWindow();
-            Current.MainWindow = enrollWindow;
-            enrollWindow.Show();
+            MessageBox.Show(GetErrorMessage(ex), "RedByte", MessageBoxButton.OK, MessageBoxImage.Error);
+            Current.Shutdown();
         }
+    }
+
+    private static string GetErrorMessage(Exception ex)
+    {
+        if (ex.Message.StartsWith("Server is not responding"))
+        {
+            return ex.Message;
+        }
+
+        return "Something went wrong. Please try again.";
     }
 }

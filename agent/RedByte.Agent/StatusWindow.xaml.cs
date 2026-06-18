@@ -9,9 +9,23 @@ namespace RedByte.Agent
         public StatusWindow()
         {
             InitializeComponent();
-            DetectionEngine engine = new DetectionEngine(DetectionSetup.CreateDetectors());
-            NetworkMonitor net = new NetworkMonitor(engine);
-            net.Start();
+
+            try
+            {
+                DetectionEngine engine = new DetectionEngine(DetectionSetup.CreateDetectors());
+                NetworkMonitor net = new NetworkMonitor(engine);
+                net.Start();
+            }
+            catch
+            {
+                MessageBox.Show(
+                    "Network protection could not start. Make sure WinPcap or Npcap is installed and try again.",
+                    "RedByte",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Error);
+
+                Application.Current.Shutdown();
+            }
         }
 
         private void HideButton_Click(object sender, RoutedEventArgs e)

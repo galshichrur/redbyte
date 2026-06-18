@@ -17,6 +17,7 @@ public class TcpClientManager
     private const int LengthSize = 4;
     private const int MaxEncryptedBodySize = 2 * 1024 * 1024;
     private const string GitGistURL = "https://gist.githubusercontent.com/galshichrur/1b160c4a5451f18e2fd0e94b844657a5/raw/gistfile1.txt";
+    private static readonly TimeSpan ServerTimeout = TimeSpan.FromSeconds(10);
 
     public static TcpClientManager GetInstance()
     {
@@ -32,12 +33,12 @@ public class TcpClientManager
 
             _client = new TcpClient();
             string serverIp = await GetServerIp();
-            await _client.ConnectAsync(serverIp, DefaultPort);
+            await _client.ConnectAsync(serverIp, DefaultPort).WaitAsync(ServerTimeout);
 
             _stream = _client.GetStream();
             _crypto = new CryptoSession();
 
-            await StartSecureSession();
+            await StartSecureSession().WaitAsync(ServerTimeout);
             return true;
         }
         catch
@@ -47,14 +48,30 @@ public class TcpClientManager
         }
     }
 
-    public Task Send(object payload)
+    public async Task Send(object payload)
     {
-        return SendSecure(payload);
+        try
+        {
+            await SendSecure(payload).WaitAsync(ServerTimeout);
+        }
+        catch
+        {
+            Disconnect();
+            throw new Exception("Server is not responding. Check your internet connection and try again.");
+        }
     }
 
     public async Task<T?> Receive<T>()
     {
-        return await ReceiveSecure<T>();
+        try
+        {
+            return await ReceiveSecure<T>().WaitAsync(ServerTimeout);
+        }
+        catch
+        {
+            Disconnect();
+            throw new Exception("Server is not responding. Check your internet connection and try again.");
+        }
     }
 
     public void Disconnect()
@@ -146,7 +163,11 @@ public class TcpClientManager
 
     private static async Task<string> GetServerIp()
     {
-        using var http = new HttpClient();
+        using var http = new HttpClient
+        {
+            Timeout = ServerTimeout
+        };
+
         string serverIp = await http.GetStringAsync(GitGistURL);
         return serverIp.Trim();
     }
