@@ -36,6 +36,7 @@ move .global.env .env
 Edit the env file
 ```
 npm install
+npm run build
 npm run start
 ```
 The website will be started at port 3000 by default.
