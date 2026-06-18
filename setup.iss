@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "RedByte"
-#define MyAppVersion "0.3.0"
+#define MyAppVersion "0.4.0"
 #define MyAppPublisher "RedByte, Inc."
 #define MyAppURL "https://redbyte.vercel.app/"
 #define MyAppExeName "RedByte.Agent.exe"
@@ -48,6 +48,7 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 Source: ".\agent\RedByte.Agent\bin\Release\net10.0-windows\win-x64\publish\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: ".\agent\RedByte.Agent\bin\Release\net10.0-windows\win-x64\publish\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: ".\images\icon.ico"; DestDir: "{app}"; Flags: ignoreversion
+Source: ".\installer\WinPcap_4_1_3.exe"; DestDir: "{tmp}"; Flags: deleteafterinstall; Check: NeedsPacketCaptureDriver
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
@@ -55,4 +56,26 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFile
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; IconFilename: "{app}\icon.ico"; Tasks: desktopicon
 
 [Run]
+Filename: "{tmp}\WinPcap_4_1_3.exe"; Parameters: "/S"; StatusMsg: "Installing WinPcap packet capture driver..."; Flags: waituntilterminated runhidden; Check: NeedsPacketCaptureDriver
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent runascurrentuser
+
+[Code]
+function SystemFileExists(FileName: string): Boolean;
+begin
+  Result :=
+    FileExists(ExpandConstant('{sys}\' + FileName)) or
+    FileExists(ExpandConstant('{syswow64}\' + FileName));
+end;
+
+function PacketCaptureDriverInstalled(): Boolean;
+begin
+  Result :=
+    (SystemFileExists('wpcap.dll') and SystemFileExists('Packet.dll')) or
+    RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\npf') or
+    RegKeyExists(HKLM, 'SYSTEM\CurrentControlSet\Services\npcap');
+end;
+
+function NeedsPacketCaptureDriver(): Boolean;
+begin
+  Result := not PacketCaptureDriverInstalled();
+end;
