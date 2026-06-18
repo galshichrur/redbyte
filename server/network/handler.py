@@ -88,7 +88,7 @@ def handle_alert(agent: Agent, payload: dict[str, Any]):
     return create_event(
         db=next(get_db()),
         user_id=agent.user_id,
-        agent_id=agent.agent_id,
+        agent_id=agent.id,
         event_type=payload.get("event_type"),
         name=payload.get("name"),
         severity=payload.get("severity"),
