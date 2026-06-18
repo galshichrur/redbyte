@@ -18,10 +18,13 @@ public class ArpPoisoningDetector : IDetector
     private readonly Dictionary<string, PhysicalAddress> _trustedMappings = new Dictionary<string, PhysicalAddress>();
     private readonly HashSet<string> _gatewayAddresses = new HashSet<string>();
     private readonly HashSet<string> _reportedAttacks = new HashSet<string>();
+    private readonly HashSet<string> _localAddresses;
 
     public ArpPoisoningDetector()
     {
+        _localAddresses = LoadLocalIPv4Addresses();
         LoadDefaultGateways();
+        PrimeGatewayArpCache();
         LoadCurrentArpCache();
     }
 
@@ -34,6 +37,7 @@ public class ArpPoisoningDetector : IDetector
         }
 
         IPAddress ipAddress = arp.SenderProtocolAddress;
+        IPAddress targetAddress = arp.TargetProtocolAddress;
         PhysicalAddress macAddress = arp.SenderHardwareAddress;
 
         if (IsEmptyAddress(ipAddress) || IsEmptyMac(macAddress))
@@ -44,7 +48,13 @@ public class ArpPoisoningDetector : IDetector
         lock (_lock)
         {
             string ip = ipAddress.ToString();
+            string targetIp = targetAddress.ToString();
             string mac = FormatMac(macAddress);
+
+            if (!IsRelevantArp(ip, targetIp))
+            {
+                return null;
+            }
 
             if (!_trustedMappings.ContainsKey(ip))
             {
@@ -111,6 +121,14 @@ public class ArpPoisoningDetector : IDetector
     private bool IsSuspiciousGatewayReply(ArpPacket arp, string ip)
     {
         return arp.Operation == ArpOperation.Response && _gatewayAddresses.Contains(ip);
+    }
+
+    private bool IsRelevantArp(string senderIp, string targetIp)
+    {
+        return _localAddresses.Contains(senderIp) ||
+               _localAddresses.Contains(targetIp) ||
+               _gatewayAddresses.Contains(senderIp) ||
+               _gatewayAddresses.Contains(targetIp);
     }
 
     private string? FindDifferentIpForMac(string currentIp, PhysicalAddress macAddress)
@@ -191,6 +209,21 @@ public class ArpPoisoningDetector : IDetector
         }
     }
 
+    private void PrimeGatewayArpCache()
+    {
+        foreach (string gateway in _gatewayAddresses)
+        {
+            try
+            {
+                using Ping ping = new Ping();
+                ping.Send(gateway, 1000);
+            }
+            catch
+            {
+            }
+        }
+    }
+
     private void LoadDefaultGateways()
     {
         foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
@@ -210,5 +243,30 @@ public class ArpPoisoningDetector : IDetector
                 }
             }
         }
+    }
+
+    private HashSet<string> LoadLocalIPv4Addresses()
+    {
+        HashSet<string> addresses = new HashSet<string>();
+
+        foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if (networkInterface.OperationalStatus != OperationalStatus.Up ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+            {
+                continue;
+            }
+
+            foreach (UnicastIPAddressInformation address in networkInterface.GetIPProperties().UnicastAddresses)
+            {
+                if (address.Address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    addresses.Add(address.Address.ToString());
+                }
+            }
+        }
+
+        return addresses;
     }
 }

@@ -13,8 +13,8 @@ public static class ArpDefender
             string ip = ipAddress.ToString();
             string mac = FormatMac(macAddress);
 
-            ExecuteCommand($"-s {ip} {mac}");
-            return true;
+            ExecuteCommand($"-d {ip}");
+            return ExecuteCommand($"-s {ip} {mac}");
         }
         catch
         {
@@ -27,7 +27,7 @@ public static class ArpDefender
         return BitConverter.ToString(macAddress.GetAddressBytes());
     }
 
-    private static void ExecuteCommand(string arguments)
+    private static bool ExecuteCommand(string arguments)
     {
         ProcessStartInfo startInfo = new ProcessStartInfo
         {
@@ -38,7 +38,14 @@ public static class ArpDefender
         };
 
         Process? process = Process.Start(startInfo);
-        process?.WaitForExit();
-        process?.Dispose();
+        if (process == null)
+        {
+            return false;
+        }
+
+        process.WaitForExit();
+        bool success = process.ExitCode == 0;
+        process.Dispose();
+        return success;
     }
 }

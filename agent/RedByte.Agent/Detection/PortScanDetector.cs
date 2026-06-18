@@ -7,14 +7,12 @@ namespace RedByte.Agent.Detection;
 
 public class PortScanDetector : IDetector
 {
-    private const int PortThreshold = 15;
+    private const int PortThreshold = 20;
     private static readonly TimeSpan TimeWindow = TimeSpan.FromSeconds(30);
-    private static readonly TimeSpan StartupGracePeriod = TimeSpan.FromSeconds(30);
 
     private readonly object _lock = new object();
     private readonly Dictionary<string, PortScanState> _sources = new Dictionary<string, PortScanState>();
     private readonly HashSet<string> _localAddresses;
-    private readonly DateTime _startedAt = DateTime.UtcNow;
 
     public PortScanDetector()
     {
@@ -35,6 +33,11 @@ public class PortScanDetector : IDetector
             return null;
         }
 
+        if (!IsLocalDestination(ipPacket.DestinationAddress))
+        {
+            return null;
+        }
+
         IPAddress sourceAddress = ipPacket.SourceAddress;
         if (ShouldIgnore(sourceAddress))
         {
@@ -45,11 +48,6 @@ public class PortScanDetector : IDetector
         {
             string sourceIp = sourceAddress.ToString();
             DateTime now = DateTime.UtcNow;
-
-            if (now - _startedAt < StartupGracePeriod)
-            {
-                return null;
-            }
 
             if (!_sources.TryGetValue(sourceIp, out PortScanState? state))
             {
@@ -120,6 +118,11 @@ public class PortScanDetector : IDetector
                _localAddresses.Contains(address.ToString()) ||
                address.ToString() == "0.0.0.0" ||
                address.ToString() == "255.255.255.255";
+    }
+
+    private bool IsLocalDestination(IPAddress address)
+    {
+        return _localAddresses.Contains(address.ToString());
     }
 
     private HashSet<string> LoadLocalIPv4Addresses()

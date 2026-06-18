@@ -3,7 +3,7 @@
 ; Non-commercial use only
 
 #define MyAppName "RedByte"
-#define MyAppVersion "0.4.0"
+#define MyAppVersion "1.0.0"
 #define MyAppPublisher "RedByte, Inc."
 #define MyAppURL "https://redbyte.vercel.app/"
 #define MyAppExeName "RedByte.Agent.exe"
