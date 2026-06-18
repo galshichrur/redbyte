@@ -48,11 +48,23 @@ namespace RedByte.Agent
             }
             catch (Exception ex)
             {
-                StatusTextBlock.Text = ex.Message;
+                string message = GetErrorMessage(ex);
+                MessageBox.Show(message, "RedByte", MessageBoxButton.OK, MessageBoxImage.Error);
+                StatusTextBlock.Text = message;
                 StatusTextBlock.Foreground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#cf3f50"));
                 StatusTextBlock.Visibility = Visibility.Visible;
-                ((Button)sender).IsEnabled = false;
+                ((Button)sender).IsEnabled = true;
             }
+        }
+
+        private static string GetErrorMessage(Exception ex)
+        {
+            if (ex.Message.StartsWith("Server is not responding"))
+            {
+                return ex.Message;
+            }
+
+            return "Something went wrong. Please try again.";
         }
     }
 }

@@ -17,7 +17,7 @@ public static class Enrollment
 
         bool connected = await client.Connect();
         if (!connected)
-            throw new Exception("Could not connect to server.");
+            throw new Exception("Server is not responding. Check your internet connection and try again.");
         
         await client.Send(request);
         EnrollResponseMessage? response = await client.Receive<EnrollResponseMessage>();
@@ -51,7 +51,7 @@ public static class Enrollment
 
         bool connected = await client.Connect();
         if (!connected)
-            throw new Exception("Could not connect to server.");
+            throw new Exception("Server is not responding. Check your internet connection and try again.");
 
         await client.Send(request);
         AuthResponseMessage? response = await client.Receive<AuthResponseMessage>();
