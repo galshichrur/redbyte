@@ -58,14 +58,34 @@ public class LlmnrSpoofingDetector : IDetector
             _reportedSources.Add(reportKey);
 
             return new DetectionReport(
-                "Poisoning",
-                $"{protocol} Poisoning",
-                2,
-                $"{protocol} activity detected from {sourceIp}. This local name-resolution protocol can be abused for spoofing in the local network.",
+                "Name Spoofing",
+                GetAlertName(protocol),
+                4,
+                GetDescription(protocol, sourceIp),
                 sourceIp,
                 false
             );
         }
+    }
+
+    private string GetAlertName(string protocol)
+    {
+        if (protocol == "LLMNR")
+        {
+            return "LLMNR Spoofing Attempt";
+        }
+
+        return "NetBIOS Spoofing Attempt";
+    }
+
+    private string GetDescription(string protocol, string sourceIp)
+    {
+        if (protocol == "LLMNR")
+        {
+            return $"Possible LLMNR spoofing from {sourceIp}. This is local Windows name lookup traffic. Attackers can answer these lookups to send a computer to the wrong device or collect login data. RedByte reported it but did not block it automatically because some networks still use LLMNR.";
+        }
+
+        return $"Possible NetBIOS spoofing from {sourceIp}. This is older Windows name traffic on the local network. Attackers can abuse it to pretend to be another computer. RedByte reported it but did not block it automatically because some networks still need NetBIOS.";
     }
 
     private string? GetNameResolutionProtocol(UdpPacket udp)

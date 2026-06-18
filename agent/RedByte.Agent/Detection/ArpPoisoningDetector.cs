@@ -53,7 +53,7 @@ public class ArpPoisoningDetector : IDetector
                     return CreateReport(
                         ip,
                         mac,
-                        $"Suspicious ARP reply detected. Gateway IP {ip} was announced by MAC {mac}, but no trusted gateway MAC was loaded yet."
+                        $"Possible ARP spoofing from {ip}. This packet says the gateway IP is using MAC {mac}, but the agent did not have a trusted gateway MAC yet. RedByte reported it so you can check this device before trusting it."
                     );
                 }
 
@@ -63,7 +63,7 @@ public class ArpPoisoningDetector : IDetector
                     return CreateReport(
                         ip,
                         mac,
-                        $"Suspicious ARP mapping detected. MAC {mac} is now claiming IP {ip} and was already seen for IP {existingIpForMac}."
+                        $"Possible ARP spoofing from {ip}. MAC {mac} is claiming this IP, but the same MAC was already seen using {existingIpForMac}. That can mean one device is pretending to be another device on the local network."
                     );
                 }
 
@@ -83,7 +83,7 @@ public class ArpPoisoningDetector : IDetector
             return CreateReport(
                 ip,
                 mac,
-                $"ARP Spoofing detected. Known IP {ip} changed from {trustedMac} to {mac}."
+                $"ARP spoofing detected for {ip}. This IP was known as MAC {trustedMac}, but now traffic says it is MAC {mac}. RedByte restored the old ARP entry so this computer keeps using the trusted address."
             );
         }
     }
@@ -99,9 +99,9 @@ public class ArpPoisoningDetector : IDetector
         _reportedAttacks.Add(attackKey);
 
         return new DetectionReport(
-            "Poisoning",
-            "ARP Poisoning",
-            3,
+            "Local Spoofing",
+            "ARP Spoofing Attempt",
+            5,
             description,
             ip,
             false

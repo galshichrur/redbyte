@@ -7,12 +7,14 @@ namespace RedByte.Agent.Detection;
 
 public class PortScanDetector : IDetector
 {
-    private const int PortThreshold = 8;
-    private static readonly TimeSpan TimeWindow = TimeSpan.FromSeconds(20);
+    private const int PortThreshold = 15;
+    private static readonly TimeSpan TimeWindow = TimeSpan.FromSeconds(30);
+    private static readonly TimeSpan StartupGracePeriod = TimeSpan.FromSeconds(30);
 
     private readonly object _lock = new object();
     private readonly Dictionary<string, PortScanState> _sources = new Dictionary<string, PortScanState>();
     private readonly HashSet<string> _localAddresses;
+    private readonly DateTime _startedAt = DateTime.UtcNow;
 
     public PortScanDetector()
     {
@@ -27,7 +29,7 @@ public class PortScanDetector : IDetector
             return null;
         }
 
-        int? destinationPort = GetDestinationPort(packet);
+        int? destinationPort = GetScannedTcpPort(packet);
         if (destinationPort == null)
         {
             return null;
@@ -44,12 +46,17 @@ public class PortScanDetector : IDetector
             string sourceIp = sourceAddress.ToString();
             DateTime now = DateTime.UtcNow;
 
-            if (!_sources.ContainsKey(sourceIp))
+            if (now - _startedAt < StartupGracePeriod)
             {
-                _sources[sourceIp] = new PortScanState();
+                return null;
             }
 
-            PortScanState state = _sources[sourceIp];
+            if (!_sources.TryGetValue(sourceIp, out PortScanState? state))
+            {
+                state = new PortScanState();
+                _sources[sourceIp] = state;
+            }
+
             RemoveOldPorts(state, now);
 
             state.Ports[destinationPort.Value] = now;
@@ -62,10 +69,10 @@ public class PortScanDetector : IDetector
             state.IsBlocked = true;
 
             return new DetectionReport(
-                "Reconnaissance",
-                "Port Scan",
-                3,
-                $"Port scanning detected. Source {sourceIp} accessed {state.Ports.Count} ports in {TimeWindow.TotalSeconds} seconds.",
+                "Network Scan",
+                "Port Scan Attempt",
+                4,
+                $"Possible port scan from {sourceIp}. This device tried to start connections to {state.Ports.Count} different ports in about {TimeWindow.TotalSeconds:0} seconds. RedByte blocked new inbound traffic from this IP to stop the scan.",
                 sourceIp,
                 true,
                 true
@@ -73,21 +80,20 @@ public class PortScanDetector : IDetector
         }
     }
 
-    private int? GetDestinationPort(Packet packet)
+    private int? GetScannedTcpPort(Packet packet)
     {
         TcpPacket tcp = packet.Extract<TcpPacket>();
-        if (tcp != null)
+        if (tcp == null)
         {
-            return tcp.DestinationPort;
+            return null;
         }
 
-        UdpPacket udp = packet.Extract<UdpPacket>();
-        if (udp != null)
+        if (!tcp.Synchronize || tcp.Acknowledgment)
         {
-            return udp.DestinationPort;
+            return null;
         }
 
-        return null;
+        return tcp.DestinationPort;
     }
 
     private void RemoveOldPorts(PortScanState state, DateTime now)
