@@ -64,7 +64,13 @@ export function HeroSection() {
               <div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
               <div className="w-3 h-3 rounded-full bg-muted-foreground/20" />
             </div>
-            <div className="aspect-[16/9] bg-gradient-to-br from-secondary via-background to-secondary/50 flex items-center justify-center"></div>
+            <div className="aspect-[1633/1109] bg-gradient-to-br from-secondary via-background to-secondary/50 flex items-start justify-center">
+              <img
+                src="/screenshot.png"
+                alt="RedByte dashboard screenshot"
+                className="h-full w-full object-contain object-top"
+              />
+            </div>
           </div>
           {/* Decorative glow */}
           <div className="absolute -inset-4 bg-primary/5 rounded-3xl blur-2xl -z-10" />
