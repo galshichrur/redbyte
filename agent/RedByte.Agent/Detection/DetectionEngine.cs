@@ -1,12 +1,14 @@
 using PacketDotNet;
 using RedByte.Agent.Blocking;
 using RedByte.Agent.Network;
+using System.Windows;
 
 namespace RedByte.Agent.Detection;
 
 public class DetectionEngine
 {
     private readonly List<IDetector> _detectors;
+    private bool _serverErrorShown;
 
     public DetectionEngine(List<IDetector> detectors)
     {
@@ -15,9 +17,9 @@ public class DetectionEngine
 
     public async Task Analyze(Packet packet)
     {
-        try
+        foreach (IDetector detector in _detectors)
         {
-            foreach (IDetector detector in _detectors)
+            try
             {
                 DetectionReport? report = detector.Analyze(packet);
 
@@ -26,10 +28,10 @@ public class DetectionEngine
                     await HandleReport(report);
                 }
             }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine(ex.Message);
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 
@@ -57,6 +59,26 @@ public class DetectionEngine
         catch (Exception ex)
         {
             Console.WriteLine(ex.Message);
+            ShowServerErrorOnce();
         }
+    }
+
+    private void ShowServerErrorOnce()
+    {
+        if (_serverErrorShown)
+        {
+            return;
+        }
+
+        _serverErrorShown = true;
+
+        Application.Current.Dispatcher.Invoke(() =>
+        {
+            MessageBox.Show(
+                "Server is not responding. Alerts cannot be sent right now.",
+                "RedByte",
+                MessageBoxButton.OK,
+                MessageBoxImage.Error);
+        });
     }
 }

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using System.Text.RegularExpressions;
 using PacketDotNet;
 using RedByte.Agent.Blocking;
@@ -15,10 +16,12 @@ public class ArpPoisoningDetector : IDetector
 
     private readonly object _lock = new object();
     private readonly Dictionary<string, PhysicalAddress> _trustedMappings = new Dictionary<string, PhysicalAddress>();
+    private readonly HashSet<string> _gatewayAddresses = new HashSet<string>();
     private readonly HashSet<string> _reportedAttacks = new HashSet<string>();
 
     public ArpPoisoningDetector()
     {
+        LoadDefaultGateways();
         LoadCurrentArpCache();
     }
 
@@ -45,6 +48,25 @@ public class ArpPoisoningDetector : IDetector
 
             if (!_trustedMappings.ContainsKey(ip))
             {
+                if (IsSuspiciousGatewayReply(arp, ip))
+                {
+                    return CreateReport(
+                        ip,
+                        mac,
+                        $"Suspicious ARP reply detected. Gateway IP {ip} was announced by MAC {mac}, but no trusted gateway MAC was loaded yet."
+                    );
+                }
+
+                string? existingIpForMac = FindDifferentIpForMac(ip, macAddress);
+                if (existingIpForMac != null)
+                {
+                    return CreateReport(
+                        ip,
+                        mac,
+                        $"Suspicious ARP mapping detected. MAC {mac} is now claiming IP {ip} and was already seen for IP {existingIpForMac}."
+                    );
+                }
+
                 _trustedMappings[ip] = macAddress;
                 return null;
             }
@@ -57,24 +79,51 @@ public class ArpPoisoningDetector : IDetector
 
             ArpDefender.RestoreMapping(ipAddress, trustedMacAddress);
 
-            string attackKey = $"{ip}:{mac}";
-            if (_reportedAttacks.Contains(attackKey))
-            {
-                return null;
-            }
-
-            _reportedAttacks.Add(attackKey);
-
             string trustedMac = FormatMac(trustedMacAddress);
-            return new DetectionReport(
-                "Poisoning",
-                "ARP Poisoning",
-                3,
-                $"ARP Spoofing detected. Known IP {ip} changed from {trustedMac} to {mac}.",
+            return CreateReport(
                 ip,
-                false
+                mac,
+                $"ARP Spoofing detected. Known IP {ip} changed from {trustedMac} to {mac}."
             );
         }
+    }
+
+    private DetectionReport? CreateReport(string ip, string mac, string description)
+    {
+        string attackKey = $"{ip}:{mac}";
+        if (_reportedAttacks.Contains(attackKey))
+        {
+            return null;
+        }
+
+        _reportedAttacks.Add(attackKey);
+
+        return new DetectionReport(
+            "Poisoning",
+            "ARP Poisoning",
+            3,
+            description,
+            ip,
+            false
+        );
+    }
+
+    private bool IsSuspiciousGatewayReply(ArpPacket arp, string ip)
+    {
+        return arp.Operation == ArpOperation.Response && _gatewayAddresses.Contains(ip);
+    }
+
+    private string? FindDifferentIpForMac(string currentIp, PhysicalAddress macAddress)
+    {
+        foreach (KeyValuePair<string, PhysicalAddress> mapping in _trustedMappings)
+        {
+            if (mapping.Key != currentIp && SameMac(mapping.Value, macAddress))
+            {
+                return mapping.Key;
+            }
+        }
+
+        return null;
     }
 
     private bool SameMac(PhysicalAddress first, PhysicalAddress second)
@@ -139,6 +188,27 @@ public class ArpPoisoningDetector : IDetector
         }
         catch
         {
+        }
+    }
+
+    private void LoadDefaultGateways()
+    {
+        foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if (networkInterface.OperationalStatus != OperationalStatus.Up ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+            {
+                continue;
+            }
+
+            foreach (GatewayIPAddressInformation gateway in networkInterface.GetIPProperties().GatewayAddresses)
+            {
+                if (gateway.Address.AddressFamily == AddressFamily.InterNetwork && !IsEmptyAddress(gateway.Address))
+                {
+                    _gatewayAddresses.Add(gateway.Address.ToString());
+                }
+            }
         }
     }
 }

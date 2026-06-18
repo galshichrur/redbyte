@@ -1,15 +1,23 @@
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
 using PacketDotNet;
 
 namespace RedByte.Agent.Detection;
 
 public class PortScanDetector : IDetector
 {
-    private const int PortThreshold = 20;
-    private static readonly TimeSpan TimeWindow = TimeSpan.FromSeconds(30);
+    private const int PortThreshold = 8;
+    private static readonly TimeSpan TimeWindow = TimeSpan.FromSeconds(20);
 
     private readonly object _lock = new object();
     private readonly Dictionary<string, PortScanState> _sources = new Dictionary<string, PortScanState>();
+    private readonly HashSet<string> _localAddresses;
+
+    public PortScanDetector()
+    {
+        _localAddresses = LoadLocalIPv4Addresses();
+    }
 
     public DetectionReport? Analyze(Packet packet)
     {
@@ -103,8 +111,34 @@ public class PortScanDetector : IDetector
     private bool ShouldIgnore(IPAddress address)
     {
         return IPAddress.IsLoopback(address) ||
+               _localAddresses.Contains(address.ToString()) ||
                address.ToString() == "0.0.0.0" ||
                address.ToString() == "255.255.255.255";
+    }
+
+    private HashSet<string> LoadLocalIPv4Addresses()
+    {
+        HashSet<string> addresses = new HashSet<string>();
+
+        foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+        {
+            if (networkInterface.OperationalStatus != OperationalStatus.Up ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Loopback ||
+                networkInterface.NetworkInterfaceType == NetworkInterfaceType.Tunnel)
+            {
+                continue;
+            }
+
+            foreach (UnicastIPAddressInformation address in networkInterface.GetIPProperties().UnicastAddresses)
+            {
+                if (address.Address.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    addresses.Add(address.Address.ToString());
+                }
+            }
+        }
+
+        return addresses;
     }
 
     private class PortScanState
